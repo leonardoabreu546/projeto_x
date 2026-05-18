@@ -1,3 +1,32 @@
+/* src/index.css */
+
+/* Forçamos o html e o body a ocupar 100% da altura da janela */
+html, body {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Regras com !important para atropelar qualquer outra configuração */
+body.bg-dark {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+}
+
+body.bg-light {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+}
+
+/* Garante que o texto dentro das divs também herde a cor */
+body.bg-dark div, body.bg-dark h1, body.bg-dark p {
+  color: #f8f9fa !important;
+}
+
+
+
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;

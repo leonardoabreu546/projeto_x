@@ -1,7 +1,7 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
 interface ThemeContextType {
-  darkMode: boolean;
+  theme: string;
   toggleTheme: () => void;
 }
 
