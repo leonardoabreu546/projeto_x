@@ -20,7 +20,7 @@ export default function Feed() {
       </div>
 
       <div className="card p-4 mb-4 shadow-sm bg-body-tertiary">
-        <h3>Olá, {user?.name}! 👋</h3>
+        <h3>Olá, {user?.username}! 👋</h3>
         <p>
           Estás logado como: <span className="badge bg-info text-dark">{user?.role}</span>
         </p>
