@@ -9,20 +9,29 @@ interface User {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  // 1. Tenta carregar o utilizador do localStorage mal o Provider inicia
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem("myApp_user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Simulação temporária de login para o Front-End funcionar
   const login = (username: string, role: "user" | "admin") => {
-    setUser({
+    const newUser: User = {
       id: "1",
       username,
       email: `${username}@email.com`,
       role,
-    });
+    };
+    
+    // 2. Guarda no estado E no localStorage
+    setUser(newUser);
+    localStorage.setItem("myApp_user", JSON.stringify(newUser));
   };
 
   const logout = () => {
+    // 3. Limpa ambos
     setUser(null);
+    localStorage.removeItem("myApp_user");
   };
 
   return (
