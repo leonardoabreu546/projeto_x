@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeProvider";
 import { AuthProvider } from "./context/AuthProvider";
-import { ProtectedRoute } from "./components/ProtectedRoute"; // Importa o segurança
+import { ProtectedRoute } from "./components/ProtectedRoute"; 
+import { Navbar } from "./components/Navbar"; // <-- ADICIONADO
 
 import Home from "./pages/Home";
 import Feed from "./pages/Feed";
@@ -13,6 +14,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <Navbar /> {/* <-- ADICIONADO */}
           <Routes>
             {/* Rota Pública: Qualquer um vê */}
             <Route path="/" element={<Home />} />
