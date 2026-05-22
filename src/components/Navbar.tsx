@@ -18,7 +18,6 @@ export function Navbar() {
     <nav className={`navbar navbar-expand-lg ${theme === 'dark' ? 'navbar-dark bg-dark' : 'navbar-light bg-light'} shadow-sm`}>
       <div className="container">
         <Link className="navbar-brand fw-bold" to="/feed">MyAPP</Link>
-        
         <div className="d-flex align-items-center">
           <ul className="navbar-nav me-3 d-flex flex-row gap-3">
             <li className="nav-item">

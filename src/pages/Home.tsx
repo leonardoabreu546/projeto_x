@@ -26,9 +26,9 @@ export default function Home() {
         <form onSubmit={handleLogin} className="mt-4">
           <input 
             type="text" 
-            className="form-control mb-3" 
-            placeholder="Teu nome" 
-            value={name} 
+            className="form-control mb-3"
+            placeholder="Teu nome"
+            value={name}
             onChange={(e) => setName(e.target.value)} 
           />
           <select className="form-select mb-3" value={role} onChange={(e) => setRole(e.target.value as "user" | "admin")}>
