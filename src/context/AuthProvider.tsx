@@ -9,6 +9,9 @@ interface User {
   role: "user" | "admin";
 }
 
+// <-- NOVO: Tipo que junta os dados do User normal com a password que vem da Base de Dados
+type DBUser = User & { password?: string };
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("myApp_user");
@@ -17,17 +20,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/users?username=${username}`);
+      const response = await axios.get("http://localhost:3000/users");
       const users = response.data;
 
-      if (users.length > 0) {
-        if (users[0].password === password) {
-          // CORREÇÃO: Criamos o objeto apenas com os campos seguros, ignorando a password
+      // <-- CORREÇÃO: Trocado 'any' por 'DBUser'
+      const foundUser = users.find((u: DBUser) => u.username === username);
+
+      if (foundUser) {
+        if (foundUser.password === password) {
           const loggedUser: User = {
-            id: users[0].id,
-            username: users[0].username,
-            email: users[0].email,
-            role: users[0].role,
+            id: foundUser.id,
+            username: foundUser.username,
+            email: foundUser.email,
+            role: foundUser.role,
           };
           
           setUser(loggedUser);
@@ -49,23 +54,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (username: string, password: string, role: "user" | "admin" = "user") => {
     try {
-      const response = await axios.get(`http://localhost:3000/users?username=${username}`);
-      if (response.data.length > 0) {
+      const response = await axios.get("http://localhost:3000/users");
+      const users = response.data;
+      
+      // <-- CORREÇÃO: Trocado 'any' por 'DBUser'
+      const userExists = users.some((u: DBUser) => u.username === username);
+
+      if (userExists) {
         alert("Este nome de utilizador já existe! Tenta fazer login.");
-        return false;
+        return false; 
       }
 
       const newUser = {
         id: Date.now().toString(),
         username,
         email: `${username}@email.com`,
-        password, // Guardamos a password na base de dados
+        password, 
         role,
       };
       
       const createResponse = await axios.post("http://localhost:3000/users", newUser);
       
-      // CORREÇÃO: Criamos o objeto apenas com os campos seguros, ignorando a password
       const loggedUser: User = {
         id: createResponse.data.id,
         username: createResponse.data.username,
