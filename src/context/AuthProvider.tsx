@@ -9,7 +9,6 @@ interface User {
   role: "user" | "admin";
 }
 
-// <-- NOVO: Tipo que junta os dados do User normal com a password que vem da Base de Dados
 type DBUser = User & { password?: string };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -23,7 +22,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await axios.get("http://localhost:3000/users");
       const users = response.data;
 
-      // <-- CORREÇÃO: Trocado 'any' por 'DBUser'
       const foundUser = users.find((u: DBUser) => u.username === username);
 
       if (foundUser) {
@@ -57,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await axios.get("http://localhost:3000/users");
       const users = response.data;
       
-      // <-- CORREÇÃO: Trocado 'any' por 'DBUser'
       const userExists = users.some((u: DBUser) => u.username === username);
 
       if (userExists) {
@@ -65,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false; 
       }
 
+      // <-- O id manual foi removido. O json-server gera-o de forma segura!
       const newUser = {
-        id: Date.now().toString(),
         username,
         email: `${username}@email.com`,
         password, 
@@ -76,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const createResponse = await axios.post("http://localhost:3000/users", newUser);
       
       const loggedUser: User = {
-        id: createResponse.data.id,
+        id: createResponse.data.id, // Apanhamos aqui o ID que o servidor gerou
         username: createResponse.data.username,
         email: createResponse.data.email,
         role: createResponse.data.role,
@@ -85,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(loggedUser);
       localStorage.setItem("myApp_user", JSON.stringify(loggedUser));
       
-      return true; // Sucesso
+      return true;
     } catch (error) {
       console.error("Erro no registo:", error);
       return false;
