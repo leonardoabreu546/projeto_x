@@ -5,6 +5,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Navbar } from "./components/Navbar"; 
 import Footer from "./components/Footer"; 
 
+import LandingPage from "./pages/LandingPage"; // <-- NOVO: Importação da página principal
 import Home from "./pages/Home";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
@@ -18,11 +19,13 @@ export default function App() {
           <div className="d-flex flex-column min-vh-100">
             <Navbar /> 
             
-            {/* <-- ALTERADO: Adicionei "py-5" para dar espaço no topo e no fundo */}
             <main className="flex-grow-1 py-5">
               <Routes>
-                {/* Rota Pública: Qualquer um vê */}
-                <Route path="/" element={<Home />} />
+                {/* <-- ALTERADO: A Rota Pública principal agora é a Landing Page */}
+                <Route path="/" element={<LandingPage />} />
+                
+                {/* <-- NOVO: O teu ecrã de Login/Registo passou para a rota /login */}
+                <Route path="/login" element={<Home />} />
                 
                 {/* Rotas Protegidas: Precisa de Login */}
                 <Route 
