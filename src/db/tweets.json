@@ -1,25 +1,18 @@
 {
   "users": [
     {
-      "id": "1",
-      "username": "111",
-      "email": "111@email.com",
-      "password": "11",
-      "role": "user"
-    },
-    {
-      "id": "2",
-      "username": "1112",
-      "email": "1112@email.com",
-      "password": "11",
-      "role": "user"
-    },
-    {
       "id": "me4llzoKQQ4",
       "username": "233",
       "email": "233@email.com",
       "password": "232",
-      "role": "user"
+      "role": "admin"
+    },
+    {
+      "username": "2334",
+      "email": "2334@email.com",
+      "password": "232",
+      "role": "user",
+      "id": "-PP5OIDYUvI"
     }
   ],
   "tweets": [
