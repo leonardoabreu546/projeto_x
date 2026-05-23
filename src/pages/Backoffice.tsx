@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth } from "../context/useAuth"; // <-- NOVO: Importar contexto
-import { useNavigate } from "react-router-dom"; // <-- NOVO: Importar navegação
+import { useAuth } from "../context/useAuth"; 
+import { useNavigate } from "react-router-dom"; 
 
 interface User {
   id: string;
@@ -12,21 +12,17 @@ interface User {
 
 export default function Backoffice() {
   const [users, setUsers] = useState<User[]>([]);
-  
-  // <-- NOVO: Puxar o utilizador e a função de redirecionamento
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // <-- NOVO: Barreira de segurança. Executa logo ao tentar abrir a página
   useEffect(() => {
     if (!user) {
-      navigate("/"); // Se não estiver logado, vai para o login
+      navigate("/"); 
     } else if (user.role !== "admin") {
-      navigate("/feed"); // Se for utilizador comum, vai para o feed
+      navigate("/feed"); 
     }
   }, [user, navigate]);
 
-  // 1. Função separada que o botão "Atualizar Lista" vai usar
   const handleRefresh = async () => {
     try {
       const response = await axios.get("http://localhost:3000/users");
@@ -36,16 +32,30 @@ export default function Backoffice() {
     }
   };
 
-  // 2. O useEffect faz o seu próprio carregamento silencioso e seguro quando a página abre
+  const handleDelete = async (id: string) => {
+    // <-- NOVO: Bloqueio extra de segurança na função
+    if (user?.id === id) {
+      alert("Não podes apagar a tua própria conta de Administrador!");
+      return;
+    }
+
+    if (window.confirm("Tens a certeza que queres apagar este utilizador?")) {
+      try {
+        await axios.delete(`http://localhost:3000/users/${id}`);
+        setUsers(users.filter((u) => u.id !== id));
+      } catch (error) {
+        console.error("Erro ao eliminar utilizador:", error);
+      }
+    }
+  };
+
   useEffect(() => {
-    // Proteção extra: não tenta ir à base de dados se não for admin
     if (!user || user.role !== "admin") return;
 
-    let isMounted = true; // Truque de segurança do React
+    let isMounted = true; 
 
     axios.get("http://localhost:3000/users")
       .then((response) => {
-        // Só atualiza o estado se o componente ainda estiver aberto no ecrã
         if (isMounted) {
           setUsers(response.data);
         }
@@ -53,11 +63,10 @@ export default function Backoffice() {
       .catch((error) => console.error("Erro no carregamento inicial:", error));
 
     return () => {
-      isMounted = false; // Limpeza quando sais da página
+      isMounted = false; 
     };
-  }, [user]); // Adicionamos o 'user' como dependência para ele reagir a mudanças
+  }, [user]);
 
-  // <-- NOVO: Mostra um ecrã vazio durante a fração de segundo em que o React está a expulsar o utilizador
   if (!user || user.role !== "admin") {
     return null;
   }
@@ -72,7 +81,6 @@ export default function Backoffice() {
             <div className="card-body">
               <h5 className="card-title">Gestão de Utilizadores</h5>
               <p className="card-text">Total: {users.length} utilizadores registados.</p>
-              {/* O botão agora chama o handleRefresh */}
               <button className="btn btn-primary btn-sm" onClick={handleRefresh}>
                 Atualizar Lista
               </button>
@@ -118,7 +126,14 @@ export default function Backoffice() {
                   </td>
                   <td>
                     <button className="btn btn-outline-primary btn-sm me-2">Editar</button>
-                    <button className="btn btn-outline-danger btn-sm">Eliminar</button>
+                    {/* <-- NOVO: O botão fica desativado (disabled) se o utilizador for o próprio */}
+                    <button 
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => handleDelete(u.id)}
+                      disabled={user.id === u.id} 
+                    >
+                      Eliminar
+                    </button>
                   </td>
                 </tr>
               ))}
