@@ -10,10 +10,19 @@ interface User {
   role: "user" | "admin";
 }
 
+// <-- ALTERADO: Adicionada a propriedade 'image' para podermos lê-la
+interface BackofficeTweet {
+  id: number;
+  author: string;
+  message: string;
+  date: string;
+  image?: string; 
+}
+
 export default function Backoffice() {
   const [users, setUsers] = useState<User[]>([]);
-  // <-- NOVO: Estado para guardar o número total de tweets
   const [totalTweets, setTotalTweets] = useState<number>(0); 
+  const [allTweets, setAllTweets] = useState<BackofficeTweet[]>([]);
   
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,12 +37,12 @@ export default function Backoffice() {
 
   const handleRefresh = async () => {
     try {
-      // <-- ALTERADO: Atualiza utilizadores e tweets ao mesmo tempo
       const responseUsers = await axios.get("http://localhost:3000/users");
       const responseTweets = await axios.get("http://localhost:3000/tweets");
       
       setUsers(responseUsers.data);
       setTotalTweets(responseTweets.data.length);
+      setAllTweets(responseTweets.data);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     }
@@ -75,12 +84,24 @@ export default function Backoffice() {
     }
   };
 
+  const handleDeleteTweet = async (id: number) => {
+    if (window.confirm("Tem a certeza absoluta de que quer apagar este Tweet? Esta ação é irreversível.")) {
+      try {
+        await axios.delete(`http://localhost:3000/tweets/${id}`);
+        const updatedTweets = allTweets.filter((t) => t.id !== id);
+        setAllTweets(updatedTweets);
+        setTotalTweets(updatedTweets.length);
+      } catch (error) {
+        console.error("Erro ao eliminar tweet:", error);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!user || user.role !== "admin") return;
 
     let isMounted = true; 
 
-    // <-- ALTERADO: Função mais limpa para ir buscar os dois dados (Utilizadores e Tweets)
     const loadDashboardData = async () => {
       try {
         const resUsers = await axios.get("http://localhost:3000/users");
@@ -88,7 +109,8 @@ export default function Backoffice() {
         
         if (isMounted) {
           setUsers(resUsers.data);
-          setTotalTweets(resTweets.data.length); // Guarda a quantidade de tweets
+          setTotalTweets(resTweets.data.length); 
+          setAllTweets(resTweets.data);
         }
       } catch (error) {
         console.error("Erro no carregamento inicial:", error);
@@ -127,14 +149,13 @@ export default function Backoffice() {
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="card-title">Estatísticas</h5>
-              {/* <-- ALTERADO: Mostra o total de tweets reais em vez do texto falso */}
               <p className="card-text">Total de Tweets: {totalTweets}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card shadow-sm">
+      <div className="card shadow-sm mb-5">
         <div className="card-header bg-dark text-white">
           <h5 className="mb-0">Lista de Utilizadores</h5>
         </div>
@@ -182,6 +203,64 @@ export default function Backoffice() {
           </table>
         </div>
       </div>
+
+      <div className="card shadow-sm">
+        <div className="card-header bg-primary text-white">
+          <h5 className="mb-0">Gestão de Tweets</h5>
+        </div>
+        <div className="card-body p-0">
+          <table className="table table-hover align-middle mb-0">
+            <thead className="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Autor</th>
+                <th style={{ width: "40%" }}>Conteúdo</th>
+                <th>Data</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allTweets.map((t) => (
+                <tr key={t.id}>
+                  <td>{t.id}</td>
+                  <td><span className="fw-bold">@{t.author}</span></td>
+                  
+                  {/* <-- ALTERADO: Agora mostra o texto completo e a imagem se existir */}
+                  <td style={{ maxWidth: "350px" }}>
+                    <p className="mb-2" style={{ whiteSpace: "pre-wrap" }}>{t.message}</p>
+                    {t.image && (
+                      <img 
+                        src={t.image} 
+                        alt="Anexo do tweet" 
+                        className="img-thumbnail rounded"
+                        style={{ maxHeight: "100px", objectFit: "cover" }} 
+                      />
+                    )}
+                  </td>
+
+                  <td>{new Date(t.date).toLocaleDateString('pt-PT')}</td>
+                  <td>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteTweet(t.id)}
+                    >
+                      Apagar Tweet
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {allTweets.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center text-muted py-3">
+                    Ainda não há tweets publicados na plataforma.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   );
 }
