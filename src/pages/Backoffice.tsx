@@ -32,8 +32,32 @@ export default function Backoffice() {
     }
   };
 
+  // <-- NOVO: Função para alternar o cargo (Role)
+  const handleToggleRole = async (targetUser: User) => {
+    // Segurança: Não deixa o admin mudar o seu próprio cargo
+    if (user?.id === targetUser.id) {
+      alert("Não podes alterar o teu próprio cargo!");
+      return;
+    }
+
+    const newRole = targetUser.role === "admin" ? "user" : "admin";
+    
+    if (window.confirm(`Mudar o cargo de ${targetUser.username} para ${newRole}?`)) {
+      try {
+        // O PATCH atualiza apenas o campo que enviarmos (neste caso, a role)
+        await axios.patch(`http://localhost:3000/users/${targetUser.id}`, { role: newRole });
+        
+        // Atualiza a lista no ecrã automaticamente
+        setUsers(users.map((u) => 
+          u.id === targetUser.id ? { ...u, role: newRole } : u
+        ));
+      } catch (error) {
+        console.error("Erro ao alterar cargo:", error);
+      }
+    }
+  };
+
   const handleDelete = async (id: string) => {
-    // <-- NOVO: Bloqueio extra de segurança na função
     if (user?.id === id) {
       alert("Não podes apagar a tua própria conta de Administrador!");
       return;
@@ -125,8 +149,14 @@ export default function Backoffice() {
                     </span>
                   </td>
                   <td>
-                    <button className="btn btn-outline-primary btn-sm me-2">Editar</button>
-                    {/* <-- NOVO: O botão fica desativado (disabled) se o utilizador for o próprio */}
+                    {/* <-- ALTERADO: O botão agora altera o cargo e está protegido para o próprio admin */}
+                    <button 
+                      className="btn btn-outline-primary btn-sm me-2"
+                      onClick={() => handleToggleRole(u)}
+                      disabled={user.id === u.id}
+                    >
+                      Alterar Cargo
+                    </button>
                     <button 
                       className="btn btn-outline-danger btn-sm"
                       onClick={() => handleDelete(u.id)}
