@@ -1,31 +1,55 @@
 {
-    "tweets": [
-        {
-        "id": 1,
-        "author": "Alice",
-        "message": "Hello, world!",
-        "image": "https://example.com/image1.jpg",
-        "likes": 10,
-        "followers": 100,
-        "date": "2024-06-01T12:00:00Z"
-        },
-        {
-        "id": 2,
-        "author": "Alice",
-        "message": "Hello, world!",
-        "image": "https://example.com/image1.jpg",
-        "likes": 10,
-        "followers": 100,
-        "date": "2024-06-01T12:00:00Z"
-        },
-        {
-        "id": 3,
-        "author": "Alice",
-        "message": "Hello, world!",
-        "image": "https://example.com/image1.jpg",
-        "likes": 10,
-        "followers": 100,
-        "date": "2024-06-01T12:00:00Z"
-        }
-    ]
+  "users": [
+    {
+      "id": "g3W3YFy5bO8",
+      "username": "qerregrge",
+      "email": "qerregrge@email.com",
+      "role": "user"
+    },
+    {
+      "id": "eGIszDt85T0",
+      "username": "fhytd",
+      "email": "fhytd@email.com",
+      "role": "admin"
+    }
+  ],
+  "tweets": [
+    {
+      "id": "1",
+      "author": "Alice",
+      "message": "Hello, world!",
+      "image": "https://example.com/image1.jpg",
+      "likes": 10,
+      "followers": 100,
+      "date": "2024-06-01T12:00:00Z"
+    },
+    {
+      "id": "2",
+      "author": "Alice",
+      "message": "Hello, world!",
+      "image": "https://example.com/image1.jpg",
+      "likes": 10,
+      "followers": 100,
+      "date": "2024-06-01T12:00:00Z"
+    },
+    {
+      "id": "3",
+      "author": "Alice",
+      "message": "Hello, world!",
+      "image": "https://example.com/image1.jpg",
+      "likes": 10,
+      "followers": 100,
+      "date": "2024-06-01T12:00:00Z"
+    },
+    {
+      "id": "JNCHawHtLxI",
+      "author": "hghjj",
+      "message": "efefewfe",
+      "image": "",
+      "likes": 0,
+      "followers": 0,
+      "date": "2026-05-22T21:27:20.127Z"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

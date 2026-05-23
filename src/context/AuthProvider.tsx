@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import axios from "axios"; // <-- Importado o axios
 import { AuthContext } from "./AuthContext";
 
 interface User {
@@ -15,17 +16,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = (username: string, role: "user" | "admin") => {
-    const newUser: User = {
-      id: "1",
-      username,
-      email: `${username}@email.com`,
-      role,
-    };
-    
-    // 2. Guarda no estado E no localStorage
-    setUser(newUser);
-    localStorage.setItem("myApp_user", JSON.stringify(newUser));
+  // 2. O login agora é async para ligar à base de dados real
+  const login = async (username: string, role: "user" | "admin") => {
+    try {
+      // Procura se o utilizador já existe no servidor
+      const response = await axios.get(`http://localhost:3000/users?username=${username}`);
+      const users = response.data;
+
+      let loggedInUser: User;
+
+      if (users.length > 0) {
+        // Se existir, usa os dados da base de dados (ignora o "role" do formulário)
+        loggedInUser = users[0];
+      } else {
+        // Se não existir, cria o utilizador na base de dados
+        const newUser = {
+          id: Date.now().toString(), // Gera um ID único em vez de ser sempre "1"
+          username,
+          email: `${username}@email.com`,
+          role,
+        };
+        
+        const createResponse = await axios.post("http://localhost:3000/users", newUser);
+        loggedInUser = createResponse.data;
+      }
+
+      // Guarda no estado E no localStorage
+      setUser(loggedInUser);
+      localStorage.setItem("myApp_user", JSON.stringify(loggedInUser));
+
+    } catch (error) {
+      console.error("Erro no login:", error);
+      alert("Erro ao comunicar com o servidor!");
+    }
   };
 
   const logout = () => {
