@@ -8,8 +8,11 @@ export default function Feed() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [tweets, setTweets] = useState<TweetProps[]>([]); // <-- 2. Troca any por TweetProps
+  const [tweets, setTweets] = useState<TweetProps[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  
+  // <-- NOVO: Estado para controlar qual o separador ativo
+  const [activeTab, setActiveTab] = useState<"all" | "following">("all");
 
   const handleLogout = () => {
     logout();
@@ -19,7 +22,7 @@ export default function Feed() {
   const getTweets = async () => {
     const response = await axios.get("http://localhost:3000/tweets");
     
-    // 3. Troca os any por TweetProps na ordenação
+    // Troca os any por TweetProps na ordenação
     const sortedTweets = response.data.sort((a: TweetProps, b: TweetProps) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
@@ -38,7 +41,7 @@ export default function Feed() {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    // 4. Diz que este objeto é do tipo TweetProps e tira o .toString() do ID para ser número
+    // Diz que este objeto é do tipo TweetProps e tira o .toString() do ID para ser número
     const newTweet: TweetProps = {
       id: Date.now(), 
       author: user?.username || "Desconhecido",
@@ -53,10 +56,19 @@ export default function Feed() {
       await axios.post("http://localhost:3000/tweets", newTweet);
       setNewMessage(""); 
       getTweets().then((data) => setTweets(data));
+      
+      // <-- NOVO: Volta para o separador "Todos" após publicar para garantirmos que o utilizador vê o seu tweet
+      setActiveTab("all"); 
     } catch (error) {
       console.error("Erro ao publicar:", error);
     }
   };
+
+  // <-- NOVO: Lógica temporária de filtragem.
+  // Por agora o "A Seguir" fica vazio até implementarmos a base de dados
+  const displayedTweets = activeTab === "all" 
+    ? tweets 
+    : tweets.filter(() => false);
 
   return (
     <div className="container py-5">
@@ -94,10 +106,39 @@ export default function Feed() {
         </form>
       </div>
 
+      {/* <-- NOVO: Separadores visuais (Tabs do Bootstrap) */}
+      <ul className="nav nav-tabs mb-4">
+        <li className="nav-item">
+          <button 
+            className={`nav-link fw-bold ${activeTab === "all" ? "active text-primary" : "text-secondary"}`}
+            onClick={() => setActiveTab("all")}
+          >
+            Todos os Tweets
+          </button>
+        </li>
+        <li className="nav-item">
+          <button 
+            className={`nav-link fw-bold ${activeTab === "following" ? "active text-primary" : "text-secondary"}`}
+            onClick={() => setActiveTab("following")}
+          >
+            A Seguir
+          </button>
+        </li>
+      </ul>
+
+      {/* <-- NOVO: Renderização condicional baseada nos separadores */}
       <div>
-        {tweets.map((tweet) => (
-          <Tweet key={tweet.id} {...tweet} />
-        ))}
+        {displayedTweets.length > 0 ? (
+          displayedTweets.map((tweet) => (
+            <Tweet key={tweet.id} {...tweet} />
+          ))
+        ) : (
+          <div className="text-center text-muted py-5">
+            {activeTab === "following" 
+              ? "Ainda não segues ninguém. Descobre novos utilizadores no separador 'Todos os Tweets'!" 
+              : "Ainda não há nenhum tweet publicado. Sê o primeiro!"}
+          </div>
+        )}
       </div>
 
     </div>
