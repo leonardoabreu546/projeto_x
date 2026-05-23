@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-// Definição do formato do utilizador
+// Definição do formato do utilizador (o perfil logado no estado não precisa de guardar a password por segurança)
 interface User {
   id: string;
   username: string;
@@ -10,7 +10,9 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, role: "user" | "admin") => void;
+  // <-- CORREÇÃO: Tiramos o '?' para tornar a password obrigatória nas duas funções
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, password: string, role: "user" | "admin") => Promise<boolean>;
   logout: () => void;
 }
 
