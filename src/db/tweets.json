@@ -5,7 +5,8 @@
       "username": "233",
       "email": "233@email.com",
       "password": "232",
-      "role": "admin"
+      "role": "admin",
+      "following": []
     },
     {
       "username": "2334",

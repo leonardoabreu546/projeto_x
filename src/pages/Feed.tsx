@@ -10,8 +10,6 @@ export default function Feed() {
 
   const [tweets, setTweets] = useState<TweetProps[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  
-  // <-- NOVO: Estado para controlar qual o separador ativo
   const [activeTab, setActiveTab] = useState<"all" | "following">("all");
 
   const handleLogout = () => {
@@ -22,12 +20,10 @@ export default function Feed() {
   const getTweets = async () => {
     const response = await axios.get("http://localhost:3000/tweets");
     
-    // Troca os any por TweetProps na ordenação
     const sortedTweets = response.data.sort((a: TweetProps, b: TweetProps) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     
-    console.log("Tweets carregados:", sortedTweets);
     return sortedTweets;
   };
 
@@ -41,7 +37,6 @@ export default function Feed() {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    // Diz que este objeto é do tipo TweetProps e tira o .toString() do ID para ser número
     const newTweet: TweetProps = {
       id: Date.now(), 
       author: user?.username || "Desconhecido",
@@ -56,19 +51,16 @@ export default function Feed() {
       await axios.post("http://localhost:3000/tweets", newTweet);
       setNewMessage(""); 
       getTweets().then((data) => setTweets(data));
-      
-      // <-- NOVO: Volta para o separador "Todos" após publicar para garantirmos que o utilizador vê o seu tweet
       setActiveTab("all"); 
     } catch (error) {
       console.error("Erro ao publicar:", error);
     }
   };
 
-  // <-- NOVO: Lógica temporária de filtragem.
-  // Por agora o "A Seguir" fica vazio até implementarmos a base de dados
+  // <-- ALTERADO: Agora filtra a sério, usando a lista 'following' do utilizador
   const displayedTweets = activeTab === "all" 
     ? tweets 
-    : tweets.filter(() => false);
+    : tweets.filter((tweet) => user?.following?.includes(tweet.author));
 
   return (
     <div className="container py-5">
@@ -106,7 +98,6 @@ export default function Feed() {
         </form>
       </div>
 
-      {/* <-- NOVO: Separadores visuais (Tabs do Bootstrap) */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button 
@@ -126,7 +117,6 @@ export default function Feed() {
         </li>
       </ul>
 
-      {/* <-- NOVO: Renderização condicional baseada nos separadores */}
       <div>
         {displayedTweets.length > 0 ? (
           displayedTweets.map((tweet) => (

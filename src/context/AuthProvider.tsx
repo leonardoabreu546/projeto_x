@@ -1,13 +1,6 @@
 import { useState, type ReactNode } from "react";
 import axios from "axios";
-import { AuthContext } from "./AuthContext";
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: "user" | "admin";
-}
+import { AuthContext, type User } from "./AuthContext"; // <-- Importamos o User do ficheiro de contexto!
 
 type DBUser = User & { password?: string };
 
@@ -31,6 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             username: foundUser.username,
             email: foundUser.email,
             role: foundUser.role,
+            // <-- NOVO: Se for uma conta antiga sem isto, damos-lhe um array vazio
+            following: foundUser.following || [], 
           };
           
           setUser(loggedUser);
@@ -62,21 +57,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false; 
       }
 
-      // <-- O id manual foi removido. O json-server gera-o de forma segura!
       const newUser = {
         username,
         email: `${username}@email.com`,
         password, 
         role,
+        following: [], // <-- NOVO: Utilizadores novos começam sem seguir ninguém
       };
       
       const createResponse = await axios.post("http://localhost:3000/users", newUser);
       
       const loggedUser: User = {
-        id: createResponse.data.id, // Apanhamos aqui o ID que o servidor gerou
+        id: createResponse.data.id, 
         username: createResponse.data.username,
         email: createResponse.data.email,
         role: createResponse.data.role,
+        following: [], // <-- NOVO: Array vazio no estado também
       };
       
       setUser(loggedUser);
@@ -94,8 +90,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("myApp_user");
   };
 
+  // <-- NOVO: Função Mágica para Seguir / Deixar de Seguir
+  const toggleFollow = async (targetUsername: string) => {
+    if (!user) return;
+
+    // Vê se já seguimos a pessoa. Se sim, remove. Se não, adiciona!
+    const isFollowing = user.following.includes(targetUsername);
+    const updatedFollowing = isFollowing
+      ? user.following.filter((name) => name !== targetUsername)
+      : [...user.following, targetUsername];
+
+    try {
+      // 1. Atualiza na base de dados usando PATCH
+      await axios.patch(`http://localhost:3000/users/${user.id}`, {
+        following: updatedFollowing
+      });
+
+      // 2. Atualiza no estado do React e no LocalStorage
+      const updatedUser = { ...user, following: updatedFollowing };
+      setUser(updatedUser);
+      localStorage.setItem("myApp_user", JSON.stringify(updatedUser));
+      
+    } catch (error) {
+      console.error("Erro ao seguir utilizador:", error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    // <-- NOVO: Exportamos também a função toggleFollow para o resto da app a poder usar
+    <AuthContext.Provider value={{ user, login, register, logout, toggleFollow }}>
       {children}
     </AuthContext.Provider>
   );
