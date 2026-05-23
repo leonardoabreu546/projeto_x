@@ -13,32 +13,35 @@ export interface TweetProps {
   following?: boolean;
 }
 
-// <-- ALTERADO: Adicionei o 'id' aqui nos parâmetros para sabermos qual atualizar
 function Tweet({ id, author, message, image, followers, date, likes }: TweetProps) {
   const { user, toggleFollow } = useAuth();
   
-  // <-- NOVO: Estados locais para controlar os likes deste tweet específico no ecrã
   const [currentLikes, setCurrentLikes] = useState(likes || 0);
-  const [hasLiked, setHasLiked] = useState(false); // Controla se a pessoa já clicou
+  const [hasLiked, setHasLiked] = useState(false); 
+
+  // <-- NOVO: Estado local para controlar o número de seguidores no ecrã
+  const [currentFollowers, setCurrentFollowers] = useState(followers || 0);
 
   const isOwnTweet = user?.username === author;
   const isFollowing = user?.following?.includes(author);
 
-  // <-- NOVO: Função que dá ou tira o Like
   const handleLike = async () => {
-    // Se já tinha dado like, tira 1. Se não, soma 1.
     const newLikesCount = hasLiked ? currentLikes - 1 : currentLikes + 1;
 
     try {
-      // Atualiza apenas o número de likes deste tweet na base de dados
       await axios.patch(`http://localhost:3000/tweets/${id}`, { likes: newLikesCount });
-      
-      // Atualiza o ecrã instantaneamente
       setCurrentLikes(newLikesCount);
       setHasLiked(!hasLiked);
     } catch (error) {
       console.error("Erro ao atualizar o like:", error);
     }
+  };
+
+  // <-- NOVO: Função que atualiza a base de dados e o número no ecrã em simultâneo
+  const handleFollowClick = async () => {
+    await toggleFollow(author);
+    // Se já estávamos a seguir, tiramos 1. Se não estávamos, somamos 1.
+    setCurrentFollowers(isFollowing ? currentFollowers - 1 : currentFollowers + 1);
   };
 
   return (
@@ -51,7 +54,8 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
           {!isOwnTweet && (
             <button 
               className={`btn btn-sm rounded-pill fw-bold ${isFollowing ? "btn-outline-secondary" : "btn-primary"}`}
-              onClick={() => toggleFollow(author)}
+              // <-- ALTERADO: Agora chama a nossa nova função
+              onClick={handleFollowClick}
             >
               {isFollowing ? "A Seguir" : "Seguir"}
             </button>
@@ -63,9 +67,9 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
         {image && <img src={image} alt="Tweet image" className="img-fluid mb-3 rounded" />}
         
         <div className="d-flex align-items-center text-muted gap-3">
-          <small>👥 {followers} seguidores</small>
+          {/* <-- ALTERADO: Agora mostra o estado currentFollowers em vez do texto fixo */}
+          <small>👥 {currentFollowers} seguidores</small>
           
-          {/* <-- ALTERADO: O texto virou um botão dinâmico para os Likes */}
           <button 
             className="btn btn-sm btn-light border-0 d-flex align-items-center gap-1"
             onClick={handleLike}

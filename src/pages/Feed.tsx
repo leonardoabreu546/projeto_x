@@ -10,6 +10,8 @@ export default function Feed() {
 
   const [tweets, setTweets] = useState<TweetProps[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  // <-- NOVO: Estado para guardar o link da imagem
+  const [newImage, setNewImage] = useState(""); 
   const [activeTab, setActiveTab] = useState<"all" | "following">("all");
 
   const handleLogout = () => {
@@ -41,7 +43,7 @@ export default function Feed() {
       id: Date.now(), 
       author: user?.username || "Desconhecido",
       message: newMessage,
-      image: "", 
+      image: newImage, // <-- ALTERADO: Agora envia a imagem que o utilizador colou!
       likes: 0,
       followers: 0, 
       date: new Date().toISOString()
@@ -50,6 +52,7 @@ export default function Feed() {
     try {
       await axios.post("http://localhost:3000/tweets", newTweet);
       setNewMessage(""); 
+      setNewImage(""); // <-- NOVO: Limpa o campo da imagem após publicar
       getTweets().then((data) => setTweets(data));
       setActiveTab("all"); 
     } catch (error) {
@@ -57,7 +60,6 @@ export default function Feed() {
     }
   };
 
-  // <-- ALTERADO: Agora filtra a sério, usando a lista 'following' do utilizador
   const displayedTweets = activeTab === "all" 
     ? tweets 
     : tweets.filter((tweet) => user?.following?.includes(tweet.author));
@@ -89,7 +91,19 @@ export default function Feed() {
               required
             ></textarea>
           </div>
-          <div className="d-flex justify-content-between align-items-center mt-2">
+          
+          {/* <-- NOVO: Campo de texto para o URL da imagem */}
+          <div className="form-group mb-3">
+            <input 
+              type="url" 
+              className="form-control form-control-sm" 
+              placeholder="🔗 URL da imagem (opcional) - Ex: https://site.com/foto.jpg"
+              value={newImage}
+              onChange={(e) => setNewImage(e.target.value)}
+            />
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center">
             <small className="text-muted">{newMessage.length}/280</small>
             <button type="submit" className="btn btn-primary rounded-pill px-4 fw-bold">
               Publicar
