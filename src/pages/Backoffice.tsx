@@ -12,6 +12,9 @@ interface User {
 
 export default function Backoffice() {
   const [users, setUsers] = useState<User[]>([]);
+  // <-- NOVO: Estado para guardar o número total de tweets
+  const [totalTweets, setTotalTweets] = useState<number>(0); 
+  
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -25,16 +28,18 @@ export default function Backoffice() {
 
   const handleRefresh = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/users");
-      setUsers(response.data);
+      // <-- ALTERADO: Atualiza utilizadores e tweets ao mesmo tempo
+      const responseUsers = await axios.get("http://localhost:3000/users");
+      const responseTweets = await axios.get("http://localhost:3000/tweets");
+      
+      setUsers(responseUsers.data);
+      setTotalTweets(responseTweets.data.length);
     } catch (error) {
-      console.error("Erro ao carregar utilizadores:", error);
+      console.error("Erro ao carregar dados:", error);
     }
   };
 
-  // <-- NOVO: Função para alternar o cargo (Role)
   const handleToggleRole = async (targetUser: User) => {
-    // Segurança: Não deixa o admin mudar o seu próprio cargo
     if (user?.id === targetUser.id) {
       alert("Não podes alterar o teu próprio cargo!");
       return;
@@ -44,10 +49,7 @@ export default function Backoffice() {
     
     if (window.confirm(`Mudar o cargo de ${targetUser.username} para ${newRole}?`)) {
       try {
-        // O PATCH atualiza apenas o campo que enviarmos (neste caso, a role)
         await axios.patch(`http://localhost:3000/users/${targetUser.id}`, { role: newRole });
-        
-        // Atualiza a lista no ecrã automaticamente
         setUsers(users.map((u) => 
           u.id === targetUser.id ? { ...u, role: newRole } : u
         ));
@@ -78,13 +80,22 @@ export default function Backoffice() {
 
     let isMounted = true; 
 
-    axios.get("http://localhost:3000/users")
-      .then((response) => {
+    // <-- ALTERADO: Função mais limpa para ir buscar os dois dados (Utilizadores e Tweets)
+    const loadDashboardData = async () => {
+      try {
+        const resUsers = await axios.get("http://localhost:3000/users");
+        const resTweets = await axios.get("http://localhost:3000/tweets");
+        
         if (isMounted) {
-          setUsers(response.data);
+          setUsers(resUsers.data);
+          setTotalTweets(resTweets.data.length); // Guarda a quantidade de tweets
         }
-      })
-      .catch((error) => console.error("Erro no carregamento inicial:", error));
+      } catch (error) {
+        console.error("Erro no carregamento inicial:", error);
+      }
+    };
+
+    loadDashboardData();
 
     return () => {
       isMounted = false; 
@@ -116,7 +127,8 @@ export default function Backoffice() {
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="card-title">Estatísticas</h5>
-              <p className="card-text">Novos registos hoje: 1</p>
+              {/* <-- ALTERADO: Mostra o total de tweets reais em vez do texto falso */}
+              <p className="card-text">Total de Tweets: {totalTweets}</p>
             </div>
           </div>
         </div>
@@ -149,7 +161,6 @@ export default function Backoffice() {
                     </span>
                   </td>
                   <td>
-                    {/* <-- ALTERADO: O botão agora altera o cargo e está protegido para o próprio admin */}
                     <button 
                       className="btn btn-outline-primary btn-sm me-2"
                       onClick={() => handleToggleRole(u)}

@@ -51,6 +51,15 @@
       "likes": 0,
       "followers": 0,
       "date": "2026-05-22T21:27:20.127Z"
+    },
+    {
+      "id": "bIwM3-MJAbw",
+      "author": "233",
+      "message": "fghjk\n",
+      "image": "",
+      "likes": 0,
+      "followers": 0,
+      "date": "2026-05-23T14:34:50.729Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
