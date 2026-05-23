@@ -1,58 +1,75 @@
 import { useAuth } from "../context/useAuth";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Tweet, { type TweetProps } from "../components/Tweet";
 
+interface UserData {
+  username: string;
+  following?: string[];
+}
+
 export default function Feed() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  // <-- ALTERADO: Removido o logout, já não precisamos dele aqui
+  const { user } = useAuth(); 
 
   const [tweets, setTweets] = useState<TweetProps[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  // <-- NOVO: Estado para guardar o link da imagem
   const [newImage, setNewImage] = useState(""); 
   const [activeTab, setActiveTab] = useState<"all" | "following">("all");
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
   const getTweets = async () => {
-    const response = await axios.get("http://localhost:3000/tweets");
-    
-    const sortedTweets = response.data.sort((a: TweetProps, b: TweetProps) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-    
-    return sortedTweets;
+    try {
+      const [responseTweets, responseUsers] = await Promise.all([
+        axios.get("http://localhost:3000/tweets"),
+        axios.get("http://localhost:3000/users")
+      ]);
+      
+      const users: UserData[] = responseUsers.data;
+
+      const tweetsComSeguidores = responseTweets.data.map((tweet: TweetProps) => {
+        const followersCount = users.filter(u => 
+          u.following && u.following.includes(tweet.author)
+        ).length;
+
+        return {
+          ...tweet,
+          followers: followersCount 
+        };
+      });
+      
+      const sortedTweets = tweetsComSeguidores.sort((a: TweetProps, b: TweetProps) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      return sortedTweets;
+    } catch (error) {
+      console.error("Erro ao carregar os dados:", error);
+      return [];
+    }
   };
 
   useEffect(() => {
-    getTweets()
-      .then((data) => setTweets(data))
-      .catch((error) => console.error("Erro ao carregar tweets:", error));
+    getTweets().then((data) => setTweets(data));
   }, []);
 
   const handlePostTweet = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const newTweet: TweetProps = {
+    const newTweet: Partial<TweetProps> = {
       id: Date.now(), 
       author: user?.username || "Desconhecido",
       message: newMessage,
-      image: newImage, // <-- ALTERADO: Agora envia a imagem que o utilizador colou!
+      image: newImage, 
       likes: 0,
-      followers: 0, 
       date: new Date().toISOString()
     };
 
     try {
       await axios.post("http://localhost:3000/tweets", newTweet);
       setNewMessage(""); 
-      setNewImage(""); // <-- NOVO: Limpa o campo da imagem após publicar
+      setNewImage(""); 
+      
       getTweets().then((data) => setTweets(data));
       setActiveTab("all"); 
     } catch (error) {
@@ -66,12 +83,8 @@ export default function Feed() {
 
   return (
     <div className="container py-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Feed de Notícias</h1>
-        <button className="btn btn-danger" onClick={handleLogout}>
-          Sair
-        </button>
-      </div>
+      {/* <-- ALTERADO: O título ficou simples e o botão "Sair" desapareceu */}
+      <h1 className="mb-4">Feed de Notícias</h1>
 
       <div className="card p-4 mb-4 shadow-sm bg-body-tertiary">
         <h3>Olá, {user?.username}! 👋</h3>
@@ -92,7 +105,6 @@ export default function Feed() {
             ></textarea>
           </div>
           
-          {/* <-- NOVO: Campo de texto para o URL da imagem */}
           <div className="form-group mb-3">
             <input 
               type="url" 

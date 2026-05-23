@@ -7,7 +7,9 @@
       "password": "232",
       "role": "admin",
       "following": [
-        "Alice"
+        "Alice",
+        "2334",
+        "111"
       ]
     },
     {
@@ -15,7 +17,11 @@
       "email": "2334@email.com",
       "password": "232",
       "role": "user",
-      "id": "-PP5OIDYUvI"
+      "id": "-PP5OIDYUvI",
+      "following": [
+        "233",
+        "111"
+      ]
     }
   ],
   "tweets": [
@@ -54,6 +60,15 @@
       "likes": 0,
       "followers": 0,
       "date": "2026-05-23T18:19:09.058Z"
+    },
+    {
+      "id": "WHqjsgmPOs0",
+      "author": "2334",
+      "message": "wdecew",
+      "image": "",
+      "likes": 1,
+      "followers": 0,
+      "date": "2026-05-23T22:32:17.523Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
