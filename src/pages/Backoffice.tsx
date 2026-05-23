@@ -68,18 +68,37 @@ export default function Backoffice() {
     }
   };
 
+  // <-- ALTERADO: Agora elimina o utilizador e os seus tweets (Cascade Delete)
   const handleDelete = async (id: string) => {
     if (user?.id === id) {
       alert("Não podes apagar a tua própria conta de Administrador!");
       return;
     }
 
-    if (window.confirm("Tens a certeza que queres apagar este utilizador?")) {
+    const userToDelete = users.find(u => u.id === id);
+    if (!userToDelete) return;
+
+    if (window.confirm(`Tens a certeza que queres apagar o utilizador ${userToDelete.username} e TODOS os seus tweets?`)) {
       try {
+        // 1. Apagar o utilizador da base de dados
         await axios.delete(`http://localhost:3000/users/${id}`);
         setUsers(users.filter((u) => u.id !== id));
+
+        // 2. Descobrir quais são os tweets desta pessoa
+        const userTweets = allTweets.filter(t => t.author === userToDelete.username);
+
+        // 3. Apagar todos os tweets dessa pessoa da base de dados simultaneamente
+        await Promise.all(
+          userTweets.map(tweet => axios.delete(`http://localhost:3000/tweets/${tweet.id}`))
+        );
+
+        // 4. Limpar esses tweets das tabelas visuais e dos contadores
+        const updatedTweets = allTweets.filter(t => t.author !== userToDelete.username);
+        setAllTweets(updatedTweets);
+        setTotalTweets(updatedTweets.length);
+
       } catch (error) {
-        console.error("Erro ao eliminar utilizador:", error);
+        console.error("Erro ao eliminar utilizador e os seus tweets:", error);
       }
     }
   };

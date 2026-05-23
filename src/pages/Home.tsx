@@ -35,7 +35,8 @@ export default function Home() {
   };
 
   return (
-    <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
+    // <-- ALTERADO: Removi o vh-100 e o justify-content-center, e adicionei mt-5 para fixar a margem no topo
+    <div className="container d-flex flex-column align-items-center mt-5">
       <div className="text-center p-5 rounded shadow bg-body-tertiary" style={{ width: "100%", maxWidth: "400px" }}>
         <h1>{isLoginMode ? "Entrar" : "Registar"}</h1>
         
