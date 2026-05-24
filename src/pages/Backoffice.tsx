@@ -260,7 +260,7 @@ export default function Backoffice() {
                   <td className="fw-bold">@{t.author}</td>
                   
                   <td>
-                    <p className="mb-2 text-wrap" style={{ whiteSpace: "pre-wrap" }}>{t.message}</p>
+                    <p className="mb-2 text-break text-center mx-auto" style={{ whiteSpace: "pre-wrap", maxWidth: "20ch" }}>{t.message}</p>
                     {t.image && (
                       <img 
                         src={t.image} 
