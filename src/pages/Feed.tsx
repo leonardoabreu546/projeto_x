@@ -87,7 +87,6 @@ export default function Feed() {
       <h2 className={`mb-4 fw-bold fs-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>Página Inicial</h2>
 
       <div className="card p-4 mb-4 border rounded-4 shadow-none bg-body">
-        {/* Mantido sempre a preto como pediste */}
         <h5 className={`fw-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>Olá, {user?.username}! 👋</h5>
         <p className="text-secondary small">
           Estás logado como: <span className="badge bg-secondary text-white">{user?.role}</span>

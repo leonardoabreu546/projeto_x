@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
+import { useTheme } from "../context/useTheme";
 
 export interface TweetProps {
   id: number;
@@ -15,17 +16,23 @@ export interface TweetProps {
 
 function Tweet({ id, author, message, image, followers, date, likes }: TweetProps) {
   const { user, toggleFollow } = useAuth();
+  const { theme } = useTheme();
   
   const [currentLikes, setCurrentLikes] = useState(likes || 0);
   const [hasLiked, setHasLiked] = useState(false); 
 
-  // Estado local para controlar o número de seguidores no ecrã
   const [currentFollowers, setCurrentFollowers] = useState(followers || 0);
 
   const isOwnTweet = user?.username === author;
   const isFollowing = user?.following?.includes(author);
 
   const handleLike = async () => {
+    // <-- ADICIONADO: Bloqueia o like se for o próprio autor
+    if (isOwnTweet) {
+      alert("Não podes dar like nas tuas próprias publicações!");
+      return;
+    }
+
     const newLikesCount = hasLiked ? currentLikes - 1 : currentLikes + 1;
 
     try {
@@ -43,14 +50,11 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
   };
 
   return (
-    // Mantemos a margem (mb-3) mas retiramos a sombra para um estilo mais "flat"
     <div className="card mb-3 border rounded-4 shadow-none bg-body">
       <div className="card-body">
         
-        {/* Cabeçalho do Tweet com Avatar */}
         <div className="d-flex justify-content-between align-items-center mb-2">
           <div className="d-flex align-items-center gap-2">
-            {/* Avatar gerado pela primeira letra */}
             <div 
               className="bg-secondary text-white d-flex justify-content-center align-items-center rounded-circle"
               style={{ width: "42px", height: "42px", fontSize: "1.2rem", fontWeight: "bold" }}
@@ -58,14 +62,15 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
               {author.charAt(0).toUpperCase()}
             </div>
             <div className="d-flex flex-column lh-1">
-              <span className="fw-bold">{author}</span>
-              <small className="text-muted mt-1">@{author.toLowerCase()}</small>
+              {/* ALTERADO: Texto para herdar a cor do tema */}
+              <span className={`fw-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{author}</span>
+              <small className="text-secondary mt-1">@{author.toLowerCase()}</small>
             </div>
           </div>
           
           {!isOwnTweet && (
             <button 
-              className={`btn btn-sm rounded-pill fw-bold px-3 py-1 ${isFollowing ? "btn-outline-secondary" : "btn-dark text-white"}`}
+              className={`btn btn-sm rounded-pill fw-bold px-3 py-1 ${isFollowing ? "btn-outline-secondary" : (theme === 'dark' ? 'btn-light text-black' : 'btn-dark text-white')}`}
               onClick={handleFollowClick}
             >
               {isFollowing ? "A Seguir" : "Seguir"}
@@ -73,12 +78,11 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
           )}
         </div>
 
-        {/* Mensagem do Tweet */}
-        <p className="card-text fs-5 mt-3 mb-3" style={{ whiteSpace: "pre-wrap" }}>
+        {/* ALTERADO: Texto da mensagem para não desaparecer no escuro */}
+        <p className={`card-text fs-5 mt-3 mb-3 ${theme === 'dark' ? 'text-white' : 'text-black'}`} style={{ whiteSpace: "pre-wrap" }}>
           {message}
         </p>
         
-        {/* Imagem do Tweet (com bordas suaves) */}
         {image && (
           <img 
             src={image} 
@@ -88,18 +92,16 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
           />
         )}
         
-        {/* Rodapé (Likes, Seguidores, Data) com separador subtil */}
-        <div className="d-flex align-items-center justify-content-between text-muted border-top pt-3 mt-2">
+        <div className="d-flex align-items-center justify-content-between text-secondary border-top pt-3 mt-2">
           <div className="d-flex gap-4 align-items-center">
             
-            {/* Botão de Like sem fundo cinzento */}
             <button 
               className="btn btn-sm bg-transparent border-0 p-0 d-flex align-items-center gap-1"
               onClick={handleLike}
               style={{ transition: "0.2s" }}
             >
               <span className="fs-5">{hasLiked ? "❤️" : "🤍"}</span> 
-              <span className={hasLiked ? "text-danger fw-bold" : "text-muted"}>
+              <span className={hasLiked ? "text-danger fw-bold" : "text-secondary"}>
                 {currentLikes > 0 ? currentLikes : ""}
               </span>
             </button>
