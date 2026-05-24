@@ -12,14 +12,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('theme', theme);
     
-    // Aplica as classes diretamente no body (como no teu código original)
-    if (theme === 'dark') {
-      document.body.classList.remove('bg-light', 'text-dark');
-      document.body.classList.add('bg-dark', 'text-white');
-    } else {
-      document.body.classList.remove('bg-dark', 'text-white');
-      document.body.classList.add('bg-light', 'text-dark');
-    }
+    // Isto é o que liga o Bootstrap 5.3+ e o nosso index.css ao Dark Mode!
+    document.documentElement.setAttribute('data-bs-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

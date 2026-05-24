@@ -12,7 +12,8 @@ export default function Home() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"user" | "admin">("user");
+  
+  // <-- REMOVIDO: const [role, setRole] = useState<"user" | "admin">("user");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,8 @@ export default function Home() {
         return;
       }
       
-      const success = await register(name, password, role);
+      // <-- ALTERADO: Passamos "user" fixo por defeito no momento do registo
+      const success = await register(name, password, "user");
       if (success) navigate("/feed");
     } else {
       const success = await login(name, password);
@@ -35,15 +37,15 @@ export default function Home() {
   return (
     <div className="container mt-4">
       <div className="row justify-content-center">
-        {/* Substituímos a medida fixa pela Grelha do Bootstrap */}
         <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
           
           <div className="text-center p-4 p-sm-5 border rounded-4 bg-body">
             
-            {/* Símbolo 𝕏 no topo da caixa */}
-            <div className="display-4 fw-bold mb-4">𝕏</div>
+            {/* Lógica de cor adicionada ao Logótipo */}
+            <div className={`display-4 fw-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>𝕏</div>
             
-            <h2 className="fw-bold mb-4">
+            {/* Lógica de cor adicionada ao Título */}
+            <h2 className={`fw-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
               {isLoginMode ? "Entrar no X" : "Criar a tua conta"}
             </h2>
             
@@ -76,7 +78,7 @@ export default function Home() {
 
               {!isLoginMode && (
                 <>
-                  <div className="form-floating mb-3">
+                  <div className="form-floating mb-4">
                     <input 
                       type="password" 
                       className="form-control rounded-3"
@@ -88,30 +90,22 @@ export default function Home() {
                     />
                     <label htmlFor="floatingConfirmPassword">Confirma a Password</label>
                   </div>
-                  
-                  <div className="form-floating mb-4">
-                    <select 
-                      className="form-select rounded-3" 
-                      id="floatingSelect"
-                      value={role} 
-                      onChange={(e) => setRole(e.target.value as "user" | "admin")}
-                    >
-                      <option value="user">Utilizador Comum</option>
-                      <option value="admin">Administrador</option>
-                    </select>
-                    <label htmlFor="floatingSelect">Tipo de conta</label>
-                  </div>
+                  {/* <-- REMOVIDO: A caixa de seleção de role (admin/user) desapareceu daqui */}
                 </>
               )}
 
-              {/* Botão largo e arredondado */}
-              <button type="submit" className={`btn w-100 py-2 mb-3 rounded-pill fw-bold ${theme === 'dark' ? 'btn-light text-black' : 'btn-dark'}`}>
+              {/* Lógica de cor adicionada ao Botão */}
+              <button 
+                type="submit" 
+                className={`btn w-100 py-2 mb-3 rounded-pill fw-bold ${theme === 'dark' ? 'btn-light text-black' : 'btn-dark text-white'}`}
+              >
                 {isLoginMode ? "Entrar" : "Registar"}
               </button>
             </form>
 
+            {/* Aplicado text-secondary para melhor leitura */}
             <button 
-              className="btn btn-link text-decoration-none text-muted mb-4" 
+              className="btn btn-link text-decoration-none text-secondary mb-4" 
               onClick={() => {
                 setIsLoginMode(!isLoginMode);
                 setPassword("");

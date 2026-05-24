@@ -2,6 +2,7 @@ import { useAuth } from "../context/useAuth";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Tweet, { type TweetProps } from "../components/Tweet";
+import { useTheme } from "../context/useTheme";
 
 interface UserData {
   username: string;
@@ -10,6 +11,7 @@ interface UserData {
 
 export default function Feed() {
   const { user } = useAuth(); 
+  const { theme } = useTheme();
 
   const [tweets, setTweets] = useState<TweetProps[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -82,18 +84,17 @@ export default function Feed() {
 
   return (
     <div className="container">
-      <h2 className="mb-4 fw-bold fs-1">Página Inicial</h2>
+      <h2 className={`mb-4 fw-bold fs-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>Página Inicial</h2>
 
-      {/* Cartão limpo, sem sombra, com bordas arredondadas subtis */}
       <div className="card p-4 mb-4 border rounded-4 shadow-none bg-body">
-        <h5 className="fw-bold mb-1">Olá, {user?.username}! 👋</h5>
-        <p className="text-muted small">
+        {/* Mantido sempre a preto como pediste */}
+        <h5 className={`fw-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>Olá, {user?.username}! 👋</h5>
+        <p className="text-secondary small">
           Estás logado como: <span className="badge bg-secondary text-white">{user?.role}</span>
         </p>
 
         <form onSubmit={handlePostTweet} className="mt-2 border-top pt-3">
           <div className="form-group mb-2">
-            {/* Textarea sem bordas e sem a marcação azul padrão ao clicar (shadow-none) */}
             <textarea 
               className="form-control border-0 fs-5 px-0 shadow-none bg-transparent" 
               rows={3} 
@@ -118,7 +119,6 @@ export default function Feed() {
 
           <div className="d-flex justify-content-between align-items-center">
             <small className="text-primary fw-medium">{newMessage.length}/280</small>
-            {/* Botão arredondado com a cor do Twitter */}
             <button type="submit" className="btn text-white rounded-pill px-4 fw-bold" style={{ backgroundColor: "#1d9bf0" }}>
               Publicar
             </button>
@@ -126,11 +126,10 @@ export default function Feed() {
         </form>
       </div>
 
-      {/* Abas mantendo a estrutura nav-tabs mas estilizadas à X */}
       <ul className="nav nav-tabs mb-4 border-bottom d-flex">
         <li className="nav-item flex-grow-1 text-center">
           <button 
-            className={`nav-link w-100 fw-bold border-0 bg-transparent py-3 ${activeTab === "all" ? "text-body" : "text-muted"}`}
+            className={`nav-link w-100 fw-bold border-0 bg-transparent py-3 ${activeTab === "all" ? (theme === 'dark' ? 'text-white' : 'text-black') : "text-secondary"}`}
             style={activeTab === "all" ? { borderBottom: "4px solid #1d9bf0", borderRadius: 0 } : { borderBottom: "4px solid transparent", borderRadius: 0 }}
             onClick={() => setActiveTab("all")}
           >
@@ -139,7 +138,7 @@ export default function Feed() {
         </li>
         <li className="nav-item flex-grow-1 text-center">
           <button 
-            className={`nav-link w-100 fw-bold border-0 bg-transparent py-3 ${activeTab === "following" ? "text-body" : "text-muted"}`}
+            className={`nav-link w-100 fw-bold border-0 bg-transparent py-3 ${activeTab === "following" ? (theme === 'dark' ? 'text-white' : 'text-black') : "text-secondary"}`}
             style={activeTab === "following" ? { borderBottom: "4px solid #1d9bf0", borderRadius: 0 } : { borderBottom: "4px solid transparent", borderRadius: 0 }}
             onClick={() => setActiveTab("following")}
           >
@@ -154,7 +153,7 @@ export default function Feed() {
             <Tweet key={tweet.id} {...tweet} />
           ))
         ) : (
-          <div className="text-center text-muted py-5">
+          <div className="text-center text-secondary py-5">
             {activeTab === "following" 
               ? "Ainda não segues ninguém. Descobre novos utilizadores no separador 'Todos os Tweets'!" 
               : "Ainda não há nenhum tweet publicado. Sê o primeiro!"}
@@ -163,5 +162,5 @@ export default function Feed() {
       </div>
 
     </div>
-  );
+  ); 
 }

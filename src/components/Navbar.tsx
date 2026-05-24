@@ -15,8 +15,8 @@ export function Navbar() {
   return (
     <nav className={`navbar navbar-expand ${theme === 'dark' ? 'navbar-dark bg-black text-white' : 'navbar-light bg-white text-dark'} border-bottom sticky-top py-2`}>
       <div className="container">
-        {/* Logótipo tipo X */}
-        <Link className="navbar-brand fw-bold fs-3 text-body text-decoration-none" to={user ? "/feed" : "/"}>
+        {/* Logótipo tipo X: lógica de cor injetada */}
+        <Link className={`navbar-brand fw-bold fs-3 text-decoration-none ${theme === 'dark' ? 'text-white' : 'text-black'}`} to={user ? "/feed" : "/"}>
           𝕏
         </Link>
         
@@ -26,10 +26,12 @@ export function Navbar() {
           {user && (
             <ul className="navbar-nav d-flex flex-row gap-3 me-2">
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/feed">Feed</Link>
+                {/* Lógica de cor injetada */}
+                <Link className={`nav-link fw-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`} to="/feed">Feed</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/profile">Perfil</Link>
+                {/* Lógica de cor injetada */}
+                <Link className={`nav-link fw-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`} to="/profile">Perfil</Link>
               </li>
               {user.role === "admin" && (
                 <li className="nav-item">

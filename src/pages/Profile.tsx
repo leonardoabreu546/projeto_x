@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import Tweet, { type TweetProps } from "../components/Tweet";
+import { useTheme } from "../context/useTheme";
 
 // <-- NOVO: Interface para ensinar ao TypeScript o que vem na resposta dos users
 interface UserData {
@@ -11,6 +12,7 @@ interface UserData {
 
 export default function Profile() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [myTweets, setMyTweets] = useState<TweetProps[]>([]);
   const [followersCount, setFollowersCount] = useState(0); 
 
@@ -96,7 +98,7 @@ export default function Profile() {
 
       {/* Secção de Tweets do Utilizador (Aba estilizada à X) */}
       <div className="border-bottom mb-3">
-        <div className="py-3 fw-bold text-body" style={{ borderBottom: "4px solid #1d9bf0", display: "inline-block" }}>
+        <div className={`py-3 fw-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`} style={{ borderBottom: "4px solid #1d9bf0", display: "inline-block" }}>
           Os Meus Tweets
         </div>
       </div>
