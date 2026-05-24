@@ -9,7 +9,6 @@ interface UserData {
 }
 
 export default function Feed() {
-  // <-- ALTERADO: Removido o logout, já não precisamos dele aqui
   const { user } = useAuth(); 
 
   const [tweets, setTweets] = useState<TweetProps[]>([]);
@@ -82,25 +81,27 @@ export default function Feed() {
     : tweets.filter((tweet) => user?.following?.includes(tweet.author));
 
   return (
-    <div className="container py-5">
-      {/* <-- ALTERADO: O título ficou simples e o botão "Sair" desapareceu */}
-      <h1 className="mb-4">Feed de Notícias</h1>
+    <div className="container">
+      <h2 className="mb-4 fw-bold fs-1">Página Inicial</h2>
 
-      <div className="card p-4 mb-4 shadow-sm bg-body-tertiary">
-        <h3>Olá, {user?.username}! 👋</h3>
-        <p>
-          Estás logado como: <span className="badge bg-info text-dark">{user?.role}</span>
+      {/* Cartão limpo, sem sombra, com bordas arredondadas subtis */}
+      <div className="card p-4 mb-4 border rounded-4 shadow-none bg-body">
+        <h5 className="fw-bold mb-1">Olá, {user?.username}! 👋</h5>
+        <p className="text-muted small">
+          Estás logado como: <span className="badge bg-secondary text-white">{user?.role}</span>
         </p>
 
-        <form onSubmit={handlePostTweet} className="mt-3 border-top pt-3">
+        <form onSubmit={handlePostTweet} className="mt-2 border-top pt-3">
           <div className="form-group mb-2">
+            {/* Textarea sem bordas e sem a marcação azul padrão ao clicar (shadow-none) */}
             <textarea 
-              className="form-control" 
+              className="form-control border-0 fs-5 px-0 shadow-none bg-transparent" 
               rows={3} 
-              placeholder="O que está a acontecer?"
+              placeholder="O que está a acontecer?!"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               maxLength={280} 
+              style={{ resize: "none" }}
               required
             ></textarea>
           </div>
@@ -108,7 +109,7 @@ export default function Feed() {
           <div className="form-group mb-3">
             <input 
               type="url" 
-              className="form-control form-control-sm" 
+              className="form-control form-control-sm border-0 bg-body-tertiary rounded-pill px-3 py-2 text-primary shadow-none" 
               placeholder="🔗 URL da imagem (opcional) - Ex: https://site.com/foto.jpg"
               value={newImage}
               onChange={(e) => setNewImage(e.target.value)}
@@ -116,26 +117,30 @@ export default function Feed() {
           </div>
 
           <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">{newMessage.length}/280</small>
-            <button type="submit" className="btn btn-primary rounded-pill px-4 fw-bold">
+            <small className="text-primary fw-medium">{newMessage.length}/280</small>
+            {/* Botão arredondado com a cor do Twitter */}
+            <button type="submit" className="btn text-white rounded-pill px-4 fw-bold" style={{ backgroundColor: "#1d9bf0" }}>
               Publicar
             </button>
           </div>
         </form>
       </div>
 
-      <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
+      {/* Abas mantendo a estrutura nav-tabs mas estilizadas à X */}
+      <ul className="nav nav-tabs mb-4 border-bottom d-flex">
+        <li className="nav-item flex-grow-1 text-center">
           <button 
-            className={`nav-link fw-bold ${activeTab === "all" ? "active text-primary" : "text-secondary"}`}
+            className={`nav-link w-100 fw-bold border-0 bg-transparent py-3 ${activeTab === "all" ? "text-body" : "text-muted"}`}
+            style={activeTab === "all" ? { borderBottom: "4px solid #1d9bf0", borderRadius: 0 } : { borderBottom: "4px solid transparent", borderRadius: 0 }}
             onClick={() => setActiveTab("all")}
           >
             Todos os Tweets
           </button>
         </li>
-        <li className="nav-item">
+        <li className="nav-item flex-grow-1 text-center">
           <button 
-            className={`nav-link fw-bold ${activeTab === "following" ? "active text-primary" : "text-secondary"}`}
+            className={`nav-link w-100 fw-bold border-0 bg-transparent py-3 ${activeTab === "following" ? "text-body" : "text-muted"}`}
+            style={activeTab === "following" ? { borderBottom: "4px solid #1d9bf0", borderRadius: 0 } : { borderBottom: "4px solid transparent", borderRadius: 0 }}
             onClick={() => setActiveTab("following")}
           >
             A Seguir

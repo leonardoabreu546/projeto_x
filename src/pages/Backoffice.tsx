@@ -10,7 +10,6 @@ interface User {
   role: "user" | "admin";
 }
 
-// <-- ALTERADO: Adicionada a propriedade 'image' para podermos lê-la
 interface BackofficeTweet {
   id: number;
   author: string;
@@ -68,7 +67,6 @@ export default function Backoffice() {
     }
   };
 
-  // <-- ALTERADO: Agora elimina o utilizador e os seus tweets (Cascade Delete)
   const handleDelete = async (id: string) => {
     if (user?.id === id) {
       alert("Não podes apagar a tua própria conta de Administrador!");
@@ -80,19 +78,15 @@ export default function Backoffice() {
 
     if (window.confirm(`Tens a certeza que queres apagar o utilizador ${userToDelete.username} e TODOS os seus tweets?`)) {
       try {
-        // 1. Apagar o utilizador da base de dados
         await axios.delete(`http://localhost:3000/users/${id}`);
         setUsers(users.filter((u) => u.id !== id));
 
-        // 2. Descobrir quais são os tweets desta pessoa
         const userTweets = allTweets.filter(t => t.author === userToDelete.username);
 
-        // 3. Apagar todos os tweets dessa pessoa da base de dados simultaneamente
         await Promise.all(
           userTweets.map(tweet => axios.delete(`http://localhost:3000/tweets/${tweet.id}`))
         );
 
-        // 4. Limpar esses tweets das tabelas visuais e dos contadores
         const updatedTweets = allTweets.filter(t => t.author !== userToDelete.username);
         setAllTweets(updatedTweets);
         setTotalTweets(updatedTweets.length);
@@ -148,16 +142,17 @@ export default function Backoffice() {
   }
 
   return (
-    <div className="container py-5">
-      <h2 className="mb-4">Painel de Controlo ⚙️</h2>
+    <div className="container py-1">
+      <h2 className="mb-4 fw-bold fs-1">Painel de Controlo ⚙️</h2>
       
-      <div className="row mb-5">
-        <div className="col-md-4">
-          <div className="card shadow-sm border-primary">
+      {/* Cartões de Estatísticas - Estilo Limpo */}
+      <div className="row mb-5 justify-content-center">
+        <div className="col-md-4 mb-3 mb-md-0">
+          <div className="card border rounded-4 shadow-none bg-body h-100">
             <div className="card-body">
-              <h5 className="card-title">Gestão de Utilizadores</h5>
-              <p className="card-text">Total: {users.length} utilizadores registados.</p>
-              <button className="btn btn-primary btn-sm" onClick={handleRefresh}>
+              <h5 className="card-title fw-bold">Gestão de Utilizadores</h5>
+              <p className="card-text text-muted">Total: <strong className="text-body">{users.length}</strong> utilizadores registados.</p>
+              <button className="btn btn-dark btn-sm rounded-pill px-3 fw-bold mt-2" onClick={handleRefresh}>
                 Atualizar Lista
               </button>
             </div>
@@ -165,51 +160,53 @@ export default function Backoffice() {
         </div>
         
         <div className="col-md-4">
-          <div className="card shadow-sm">
+          <div className="card border rounded-4 shadow-none bg-body h-100">
             <div className="card-body">
-              <h5 className="card-title">Estatísticas</h5>
-              <p className="card-text">Total de Tweets: {totalTweets}</p>
+              <h5 className="card-title fw-bold">Estatísticas</h5>
+              <p className="card-text text-muted">Total de Tweets: <strong className="text-body">{totalTweets}</strong></p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card shadow-sm mb-5">
-        <div className="card-header bg-dark text-white">
-          <h5 className="mb-0">Lista de Utilizadores</h5>
+      {/* Tabela de Utilizadores */}
+      <div className="card border rounded-4 shadow-none mb-5 overflow-hidden bg-body">
+        <div className="px-4 py-3 border-bottom">
+          <h5 className="mb-0 fw-bold">Lista de Utilizadores</h5>
         </div>
-        <div className="card-body p-0">
-          <table className="table table-hover mb-0">
-            <thead className="table-light">
+        {/* <-- NOVO: table-responsive para adaptar sem estragar o ecrã */}
+        <div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+            <thead className="text-muted" style={{ borderBottom: "2px solid var(--bs-border-color)" }}>
               <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Cargo</th>
-                <th>Ações</th>
+                <th className="fw-medium border-0 px-4 pt-3 pb-2">ID</th>
+                <th className="fw-medium border-0 pt-3 pb-2">Nome</th>
+                <th className="fw-medium border-0 pt-3 pb-2">Email</th>
+                <th className="fw-medium border-0 pt-3 pb-2">Cargo</th>
+                <th className="fw-medium border-0 px-4 pt-3 pb-2">Ações</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.id}</td>
-                  <td>{u.username}</td>
-                  <td>{u.email}</td>
+                  <td className="px-4">{u.id}</td>
+                  <td className="fw-bold">@{u.username}</td>
+                  <td className="text-muted">{u.email}</td>
                   <td>
                     <span className={`badge ${u.role === 'admin' ? 'bg-danger' : 'bg-secondary'}`}>
                       {u.role}
                     </span>
                   </td>
-                  <td>
+                  <td className="px-4 text-nowrap">
                     <button 
-                      className="btn btn-outline-primary btn-sm me-2"
+                      className="btn btn-outline-secondary btn-sm rounded-pill fw-bold me-2"
                       onClick={() => handleToggleRole(u)}
                       disabled={user.id === u.id}
                     >
                       Alterar Cargo
                     </button>
                     <button 
-                      className="btn btn-outline-danger btn-sm"
+                      className="btn btn-outline-danger btn-sm rounded-pill fw-bold"
                       onClick={() => handleDelete(u.id)}
                       disabled={user.id === u.id} 
                     >
@@ -223,55 +220,55 @@ export default function Backoffice() {
         </div>
       </div>
 
-      <div className="card shadow-sm">
-        <div className="card-header bg-primary text-white">
-          <h5 className="mb-0">Gestão de Tweets</h5>
+      {/* Tabela de Tweets */}
+      <div className="card border rounded-4 shadow-none overflow-hidden bg-body">
+        <div className="px-4 py-3 border-bottom">
+          <h5 className="mb-0 fw-bold">Gestão de Tweets</h5>
         </div>
-        <div className="card-body p-0">
+        <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
-            <thead className="table-light">
+            <thead className="text-muted" style={{ borderBottom: "2px solid var(--bs-border-color)" }}>
               <tr>
-                <th>ID</th>
-                <th>Autor</th>
-                <th style={{ width: "40%" }}>Conteúdo</th>
-                <th>Data</th>
-                <th>Ações</th>
+                <th className="fw-medium border-0 px-4 pt-3 pb-2">ID</th>
+                <th className="fw-medium border-0 pt-3 pb-2">Autor</th>
+                <th className="fw-medium border-0 pt-3 pb-2" style={{ minWidth: "300px" }}>Conteúdo</th>
+                <th className="fw-medium border-0 pt-3 pb-2">Data</th>
+                <th className="fw-medium border-0 px-4 pt-3 pb-2">Ações</th>
               </tr>
             </thead>
             <tbody>
               {allTweets.map((t) => (
                 <tr key={t.id}>
-                  <td>{t.id}</td>
-                  <td><span className="fw-bold">@{t.author}</span></td>
+                  <td className="px-4">{t.id}</td>
+                  <td className="fw-bold">@{t.author}</td>
                   
-                  {/* <-- ALTERADO: Agora mostra o texto completo e a imagem se existir */}
-                  <td style={{ maxWidth: "350px" }}>
-                    <p className="mb-2" style={{ whiteSpace: "pre-wrap" }}>{t.message}</p>
+                  <td>
+                    <p className="mb-2 text-wrap" style={{ whiteSpace: "pre-wrap" }}>{t.message}</p>
                     {t.image && (
                       <img 
                         src={t.image} 
                         alt="Anexo do tweet" 
-                        className="img-thumbnail rounded"
-                        style={{ maxHeight: "100px", objectFit: "cover" }} 
+                        className="img-thumbnail rounded-4 border"
+                        style={{ maxHeight: "80px", objectFit: "cover" }} 
                       />
                     )}
                   </td>
 
-                  <td>{new Date(t.date).toLocaleDateString('pt-PT')}</td>
-                  <td>
+                  <td className="text-muted text-nowrap">{new Date(t.date).toLocaleDateString('pt-PT')}</td>
+                  <td className="px-4">
                     <button 
-                      className="btn btn-danger btn-sm"
+                      className="btn btn-danger btn-sm rounded-pill fw-bold"
                       onClick={() => handleDeleteTweet(t.id)}
                     >
-                      Apagar Tweet
+                      Apagar
                     </button>
                   </td>
                 </tr>
               ))}
               {allTweets.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center text-muted py-3">
-                    Ainda não há tweets publicados na plataforma.
+                  <td colSpan={5} className="text-center text-muted py-5">
+                    <h6 className="fw-bold mb-0">Ainda não há tweets publicados na plataforma.</h6>
                   </td>
                 </tr>
               )}

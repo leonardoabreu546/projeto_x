@@ -19,7 +19,7 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
   const [currentLikes, setCurrentLikes] = useState(likes || 0);
   const [hasLiked, setHasLiked] = useState(false); 
 
-  // <-- NOVO: Estado local para controlar o número de seguidores no ecrã
+  // Estado local para controlar o número de seguidores no ecrã
   const [currentFollowers, setCurrentFollowers] = useState(followers || 0);
 
   const isOwnTweet = user?.username === author;
@@ -37,24 +37,35 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
     }
   };
 
-  // <-- NOVO: Função que atualiza a base de dados e o número no ecrã em simultâneo
   const handleFollowClick = async () => {
     await toggleFollow(author);
-    // Se já estávamos a seguir, tiramos 1. Se não estávamos, somamos 1.
     setCurrentFollowers(isFollowing ? currentFollowers - 1 : currentFollowers + 1);
   };
 
   return (
-    <div className="card mb-3 shadow-sm">
+    // Mantemos a margem (mb-3) mas retiramos a sombra para um estilo mais "flat"
+    <div className="card mb-3 border rounded-4 shadow-none bg-body">
       <div className="card-body">
         
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="card-title mb-0">@{author}</h5>
+        {/* Cabeçalho do Tweet com Avatar */}
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <div className="d-flex align-items-center gap-2">
+            {/* Avatar gerado pela primeira letra */}
+            <div 
+              className="bg-secondary text-white d-flex justify-content-center align-items-center rounded-circle"
+              style={{ width: "42px", height: "42px", fontSize: "1.2rem", fontWeight: "bold" }}
+            >
+              {author.charAt(0).toUpperCase()}
+            </div>
+            <div className="d-flex flex-column lh-1">
+              <span className="fw-bold">{author}</span>
+              <small className="text-muted mt-1">@{author.toLowerCase()}</small>
+            </div>
+          </div>
           
           {!isOwnTweet && (
             <button 
-              className={`btn btn-sm rounded-pill fw-bold ${isFollowing ? "btn-outline-secondary" : "btn-primary"}`}
-              // <-- ALTERADO: Agora chama a nossa nova função
+              className={`btn btn-sm rounded-pill fw-bold px-3 py-1 ${isFollowing ? "btn-outline-secondary" : "btn-dark text-white"}`}
               onClick={handleFollowClick}
             >
               {isFollowing ? "A Seguir" : "Seguir"}
@@ -62,26 +73,45 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
           )}
         </div>
 
-        <p className="card-text fs-5">{message}</p>
+        {/* Mensagem do Tweet */}
+        <p className="card-text fs-5 mt-3 mb-3" style={{ whiteSpace: "pre-wrap" }}>
+          {message}
+        </p>
         
-        {image && <img src={image} alt="Tweet image" className="img-fluid mb-3 rounded" />}
+        {/* Imagem do Tweet (com bordas suaves) */}
+        {image && (
+          <img 
+            src={image} 
+            alt="Anexo da publicação" 
+            className="img-fluid mb-3 rounded-4 border w-100" 
+            style={{ maxHeight: "400px", objectFit: "cover" }}
+          />
+        )}
         
-        <div className="d-flex align-items-center text-muted gap-3">
-          {/* <-- ALTERADO: Agora mostra o estado currentFollowers em vez do texto fixo */}
-          <small>👥 {currentFollowers} seguidores</small>
-          
-          <button 
-            className="btn btn-sm btn-light border-0 d-flex align-items-center gap-1"
-            onClick={handleLike}
-            style={{ transition: "0.2s" }}
-          >
-            {hasLiked ? "❤️" : "🤍"} 
-            <span className={hasLiked ? "text-danger fw-bold" : "text-muted"}>
-              {currentLikes} likes
-            </span>
-          </button>
+        {/* Rodapé (Likes, Seguidores, Data) com separador subtil */}
+        <div className="d-flex align-items-center justify-content-between text-muted border-top pt-3 mt-2">
+          <div className="d-flex gap-4 align-items-center">
+            
+            {/* Botão de Like sem fundo cinzento */}
+            <button 
+              className="btn btn-sm bg-transparent border-0 p-0 d-flex align-items-center gap-1"
+              onClick={handleLike}
+              style={{ transition: "0.2s" }}
+            >
+              <span className="fs-5">{hasLiked ? "❤️" : "🤍"}</span> 
+              <span className={hasLiked ? "text-danger fw-bold" : "text-muted"}>
+                {currentLikes > 0 ? currentLikes : ""}
+              </span>
+            </button>
 
-          <small>📅 {new Date(date).toLocaleString('pt-PT')}</small>
+            <span className="d-flex align-items-center gap-1" title="Seguidores do autor">
+              <span className="fs-6">👥</span> {currentFollowers}
+            </span>
+          </div>
+
+          <small>
+            {new Date(date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })} · {new Date(date).toLocaleDateString('pt-PT')}
+          </small>
         </div>
         
       </div>

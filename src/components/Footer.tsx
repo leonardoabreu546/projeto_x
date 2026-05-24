@@ -1,10 +1,9 @@
 export default function Footer() {
   return (
-    <footer className="bg-body-tertiary text-center text-muted py-4 mt-auto border-top">
+    <footer className="text-center text-muted py-3 mt-auto border-top bg-transparent">
       <div className="container">
-        <small>
-          &copy; {new Date().getFullYear()} Projeto DWFE - Clone do X/Twitter. 
-          Desenvolvido para a unidade curricular de Desenvolvimento Web Front-End.
+        <small className="fw-medium">
+          &copy; {new Date().getFullYear()} 𝕏 Clone. Desenvolvido para DWFE.
         </small>
       </div>
     </footer>

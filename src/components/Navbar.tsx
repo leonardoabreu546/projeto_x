@@ -7,39 +7,56 @@ export function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  if (!user) return null; // Se não estiver logado, não mostra a navbar
-
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
   return (
-    <nav className={`navbar navbar-expand-lg ${theme === 'dark' ? 'navbar-dark bg-dark' : 'navbar-light bg-light'} shadow-sm`}>
+    <nav className={`navbar navbar-expand ${theme === 'dark' ? 'navbar-dark bg-black text-white' : 'navbar-light bg-white text-dark'} border-bottom sticky-top py-2`}>
       <div className="container">
-        <Link className="navbar-brand fw-bold" to="/feed">MyAPP</Link>
-        <div className="d-flex align-items-center">
-          <ul className="navbar-nav me-3 d-flex flex-row gap-3">
-            <li className="nav-item">
-              <Link className="nav-link" to="/feed">Feed</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/profile">Perfil</Link>
-            </li>
-            
-            {/* LINK CONDICIONAL: Só aparece para Admin */}
-            {user.role === "admin" && (
+        {/* Logótipo tipo X */}
+        <Link className="navbar-brand fw-bold fs-3 text-body text-decoration-none" to={user ? "/feed" : "/"}>
+          𝕏
+        </Link>
+        
+        <div className="d-flex align-items-center justify-content-end gap-2 w-100">
+          
+          {/* Só mostra os links de navegação se estiver logado */}
+          {user && (
+            <ul className="navbar-nav d-flex flex-row gap-3 me-2">
               <li className="nav-item">
-                <Link className="nav-link text-danger fw-bold" to="/backoffice">Backoffice</Link>
+                <Link className="nav-link fw-semibold" to="/feed">Feed</Link>
               </li>
-            )}
-          </ul>
+              <li className="nav-item">
+                <Link className="nav-link fw-semibold" to="/profile">Perfil</Link>
+              </li>
+              {user.role === "admin" && (
+                <li className="nav-item">
+                  <Link className="nav-link text-danger fw-semibold" to="/backoffice">Admin</Link>
+                </li>
+              )}
+            </ul>
+          )}
 
-          <button className="btn btn-outline-secondary btn-sm me-2" onClick={toggleTheme}>
+          {/* Botão de Tema minimalista sem bordas fortes */}
+          <button 
+            className="btn btn-outline-secondary btn-sm rounded-circle border-0 fs-5" 
+            onClick={toggleTheme}
+            title="Mudar tema"
+          >
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
           
-          <button className="btn btn-danger btn-sm" onClick={handleLogout}>Sair</button>
+          {/* Botão Sair tipo pílula (contraste dinâmico) */}
+          {user && (
+            <button 
+              className={`btn btn-sm rounded-pill px-4 fw-bold ms-2 ${theme === 'dark' ? 'btn-light text-black' : 'btn-dark'}`} 
+              onClick={handleLogout}
+            >
+              Sair
+            </button>
+          )}
         </div>
       </div>
     </nav>
