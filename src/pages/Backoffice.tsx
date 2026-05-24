@@ -8,6 +8,7 @@ interface User {
   username: string; 
   email: string;
   role: "user" | "admin";
+  following?: string[]; // <-- ADICIONADO: Para o TypeScript saber que os utilizadores podem ter a lista "following"
 }
 
 interface BackofficeTweet {
@@ -67,6 +68,7 @@ export default function Backoffice() {
     }
   };
 
+  // <-- ALTERADO: Agora a função handleDelete também limpa a lista de seguidores
   const handleDelete = async (id: string) => {
     if (user?.id === id) {
       alert("Não podes apagar a tua própria conta de Administrador!");
@@ -78,11 +80,12 @@ export default function Backoffice() {
 
     if (window.confirm(`Tens a certeza que queres apagar o utilizador ${userToDelete.username} e TODOS os seus tweets?`)) {
       try {
+        // 1. Apagar o utilizador
         await axios.delete(`http://localhost:3000/users/${id}`);
         setUsers(users.filter((u) => u.id !== id));
 
+        // 2. Apagar os tweets do utilizador
         const userTweets = allTweets.filter(t => t.author === userToDelete.username);
-
         await Promise.all(
           userTweets.map(tweet => axios.delete(`http://localhost:3000/tweets/${tweet.id}`))
         );
@@ -91,8 +94,23 @@ export default function Backoffice() {
         setAllTweets(updatedTweets);
         setTotalTweets(updatedTweets.length);
 
+        // 3. LIMPEZA EM CASCATA: Remover este utilizador da lista "following" de todos os outros
+        const updateFollowersPromises = users.map((u) => {
+          // Se o utilizador atual (u) tiver o utilizador apagado na sua lista de 'following'
+          if (u.following && u.following.includes(userToDelete.username)) {
+            // Cria uma nova lista de seguidores excluindo o utilizador apagado
+            const newFollowing = u.following.filter((name) => name !== userToDelete.username);
+            // Faz um patch para atualizar a lista na base de dados
+            return axios.patch(`http://localhost:3000/users/${u.id}`, { following: newFollowing });
+          }
+          return null;
+        }).filter(Boolean); // Remove os 'null' da lista de promessas
+
+        // Executa todas as atualizações nas listas de seguidores simultaneamente
+        await Promise.all(updateFollowersPromises);
+
       } catch (error) {
-        console.error("Erro ao eliminar utilizador e os seus tweets:", error);
+        console.error("Erro ao eliminar utilizador e as suas dependências:", error);
       }
     }
   };
@@ -174,8 +192,7 @@ export default function Backoffice() {
         <div className="px-4 py-3 border-bottom">
           <h5 className="mb-0 fw-bold">Lista de Utilizadores</h5>
         </div>
-        {/* <-- NOVO: table-responsive para adaptar sem estragar o ecrã */}
-        <div className="table-responsive">
+                <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead className="text-muted" style={{ borderBottom: "2px solid var(--bs-border-color)" }}>
               <tr>
@@ -276,7 +293,6 @@ export default function Backoffice() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }
