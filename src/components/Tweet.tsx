@@ -27,7 +27,7 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
   const isFollowing = user?.following?.includes(author);
 
   const handleLike = async () => {
-    // <-- ADICIONADO: Bloqueia o like se for o próprio autor
+    // Bloqueia o like se for o próprio autor
     if (isOwnTweet) {
       alert("Não podes dar like nas tuas próprias publicações!");
       return;
@@ -61,8 +61,8 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
             >
               {author.charAt(0).toUpperCase()}
             </div>
-            <div className="d-flex flex-column lh-1">
-              {/* ALTERADO: Texto para herdar a cor do tema */}
+            {/* Adicionado text-start aqui também para garantir o alinhamento do nome */}
+            <div className="d-flex flex-column lh-1 text-start">
               <span className={`fw-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{author}</span>
               <small className="text-secondary mt-1">@{author.toLowerCase()}</small>
             </div>
@@ -78,8 +78,8 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
           )}
         </div>
 
-        {/* ALTERADO: Texto da mensagem para não desaparecer no escuro */}
-        <p className={`card-text fs-5 mt-3 mb-3 ${theme === 'dark' ? 'text-white' : 'text-black'}`} style={{ whiteSpace: "pre-wrap" }}>
+        {/* <-- ALTERADO: Adicionado 'text-start' para alinhar o texto do tweet à esquerda --> */}
+        <p className={`card-text fs-5 mt-3 mb-3 text-start ${theme === 'dark' ? 'text-white' : 'text-black'}`} style={{ whiteSpace: "pre-wrap" }}>
           {message}
         </p>
         
