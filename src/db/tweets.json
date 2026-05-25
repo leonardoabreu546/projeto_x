@@ -2,7 +2,7 @@
   "users": [
     {
       "id": "me4llzoKQQ4",
-      "username": "233",
+      "username": "accd",
       "email": "233@email.com",
       "password": "232",
       "role": "admin",
@@ -10,7 +10,8 @@
         "Alice",
         "111",
         "2334"
-      ]
+      ],
+      "profileColor": "bg-primary"
     },
     {
       "username": "2334",
