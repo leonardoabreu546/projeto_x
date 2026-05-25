@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import { useAuth } from "../context/useAuth";
-import { useTheme } from "../context/useTheme";
+import { useAuth } from "../../context/useAuth";
+import { useTheme } from "../../context/useTheme";
 
 export interface TweetProps {
   id: number;

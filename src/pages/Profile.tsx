@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
-import Tweet, { type TweetProps } from "../components/Tweet";
+import Tweet, { type TweetProps } from "../components/feed/Tweet";
 import { useTheme } from "../context/useTheme";
 
 // Interface para os dados que recebemos da API
