@@ -2,22 +2,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/useAuth"; 
 import { useNavigate } from "react-router-dom"; 
-
-interface User {
-  id: string;
-  username: string; 
-  email: string;
-  role: "user" | "admin";
-  following?: string[]; // <-- ADICIONADO: Para o TypeScript saber que os utilizadores podem ter a lista "following"
-}
-
-interface BackofficeTweet {
-  id: number;
-  author: string;
-  message: string;
-  date: string;
-  image?: string; 
-}
+import { StatsCards } from "../components/backoffice/StatsCards";
+import { UsersTable, type User } from "../components/backoffice/UsersTable";
+import { TweetsTable, type BackofficeTweet } from "../components/backoffice/TweetsTable";
 
 export default function Backoffice() {
   const [users, setUsers] = useState<User[]>([]);
@@ -68,7 +55,6 @@ export default function Backoffice() {
     }
   };
 
-  // <-- ALTERADO: Agora a função handleDelete também limpa a lista de seguidores
   const handleDelete = async (id: string) => {
     if (user?.id === id) {
       alert("Não podes apagar a tua própria conta de Administrador!");
@@ -94,19 +80,15 @@ export default function Backoffice() {
         setAllTweets(updatedTweets);
         setTotalTweets(updatedTweets.length);
 
-        // 3. LIMPEZA EM CASCATA: Remover este utilizador da lista "following" de todos os outros
+        // 3. LIMPEZA EM CASCATA
         const updateFollowersPromises = users.map((u) => {
-          // Se o utilizador atual (u) tiver o utilizador apagado na sua lista de 'following'
           if (u.following && u.following.includes(userToDelete.username)) {
-            // Cria uma nova lista de seguidores excluindo o utilizador apagado
             const newFollowing = u.following.filter((name) => name !== userToDelete.username);
-            // Faz um patch para atualizar a lista na base de dados
             return axios.patch(`http://localhost:3000/users/${u.id}`, { following: newFollowing });
           }
           return null;
-        }).filter(Boolean); // Remove os 'null' da lista de promessas
+        }).filter(Boolean); 
 
-        // Executa todas as atualizações nas listas de seguidores simultaneamente
         await Promise.all(updateFollowersPromises);
 
       } catch (error) {
@@ -163,136 +145,23 @@ export default function Backoffice() {
     <div className="container py-1">
       <h2 className="mb-4 fw-bold fs-1">Painel de Controlo ⚙️</h2>
       
-      {/* Cartões de Estatísticas - Estilo Limpo */}
-      <div className="row mb-5 justify-content-center">
-        <div className="col-md-4 mb-3 mb-md-0">
-          <div className="card border rounded-4 shadow-none bg-body h-100">
-            <div className="card-body">
-              <h5 className="card-title fw-bold">Gestão de Utilizadores</h5>
-              <p className="card-text text-muted">Total: <strong className="text-body">{users.length}</strong> utilizadores registados.</p>
-              <button className="btn btn-dark btn-sm rounded-pill px-3 fw-bold mt-2" onClick={handleRefresh}>
-                Atualizar Lista
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div className="col-md-4">
-          <div className="card border rounded-4 shadow-none bg-body h-100">
-            <div className="card-body">
-              <h5 className="card-title fw-bold">Estatísticas</h5>
-              <p className="card-text text-muted">Total de Tweets: <strong className="text-body">{totalTweets}</strong></p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StatsCards 
+        usersCount={users.length} 
+        totalTweets={totalTweets} 
+        onRefresh={handleRefresh} 
+      />
 
-      {/* Tabela de Utilizadores */}
-      <div className="card border rounded-4 shadow-none mb-5 overflow-hidden bg-body">
-        <div className="px-4 py-3 border-bottom">
-          <h5 className="mb-0 fw-bold">Lista de Utilizadores</h5>
-        </div>
-                <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="text-muted" style={{ borderBottom: "2px solid var(--bs-border-color)" }}>
-              <tr>
-                <th className="fw-medium border-0 px-4 pt-3 pb-2">ID</th>
-                <th className="fw-medium border-0 pt-3 pb-2">Nome</th>
-                <th className="fw-medium border-0 pt-3 pb-2">Email</th>
-                <th className="fw-medium border-0 pt-3 pb-2">Cargo</th>
-                <th className="fw-medium border-0 px-4 pt-3 pb-2">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td className="px-4">{u.id}</td>
-                  <td className="fw-bold">@{u.username}</td>
-                  <td className="text-muted">{u.email}</td>
-                  <td>
-                    <span className={`badge ${u.role === 'admin' ? 'bg-danger' : 'bg-secondary'}`}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-4 text-nowrap">
-                    <button 
-                      className="btn btn-outline-secondary btn-sm rounded-pill fw-bold me-2"
-                      onClick={() => handleToggleRole(u)}
-                      disabled={user.id === u.id}
-                    >
-                      Alterar Cargo
-                    </button>
-                    <button 
-                      className="btn btn-outline-danger btn-sm rounded-pill fw-bold"
-                      onClick={() => handleDelete(u.id)}
-                      disabled={user.id === u.id} 
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <UsersTable 
+        users={users} 
+        currentUserId={user.id} 
+        onToggleRole={handleToggleRole} 
+        onDelete={handleDelete} 
+      />
 
-      {/* Tabela de Tweets */}
-      <div className="card border rounded-4 shadow-none overflow-hidden bg-body">
-        <div className="px-4 py-3 border-bottom">
-          <h5 className="mb-0 fw-bold">Gestão de Tweets</h5>
-        </div>
-        <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="text-muted" style={{ borderBottom: "2px solid var(--bs-border-color)" }}>
-              <tr>
-                <th className="fw-medium border-0 px-4 pt-3 pb-2">ID</th>
-                <th className="fw-medium border-0 pt-3 pb-2">Autor</th>
-                <th className="fw-medium border-0 pt-3 pb-2" style={{ minWidth: "300px" }}>Conteúdo</th>
-                <th className="fw-medium border-0 pt-3 pb-2">Data</th>
-                <th className="fw-medium border-0 px-4 pt-3 pb-2">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allTweets.map((t) => (
-                <tr key={t.id}>
-                  <td className="px-4">{t.id}</td>
-                  <td className="fw-bold">@{t.author}</td>
-                  
-                  <td>
-                    <p className="mb-2 text-break text-center mx-auto" style={{ whiteSpace: "pre-wrap", maxWidth: "20ch" }}>{t.message}</p>
-                    {t.image && (
-                      <img 
-                        src={t.image} 
-                        alt="Anexo do tweet" 
-                        className="img-thumbnail rounded-4 border"
-                        style={{ maxHeight: "80px", objectFit: "cover" }} 
-                      />
-                    )}
-                  </td>
-
-                  <td className="text-muted text-nowrap">{new Date(t.date).toLocaleDateString('pt-PT')}</td>
-                  <td className="px-4">
-                    <button 
-                      className="btn btn-danger btn-sm rounded-pill fw-bold"
-                      onClick={() => handleDeleteTweet(t.id)}
-                    >
-                      Apagar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {allTweets.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="text-center text-muted py-5">
-                    <h6 className="fw-bold mb-0">Ainda não há tweets publicados na plataforma.</h6>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <TweetsTable 
+        tweets={allTweets} 
+        onDeleteTweet={handleDeleteTweet} 
+      />
     </div>
   );
 }
