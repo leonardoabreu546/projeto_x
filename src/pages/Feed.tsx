@@ -1,12 +1,12 @@
 import { useAuth } from "../context/useAuth";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Tweet, { type TweetProps } from "../components/feed/Tweet";
+import type { TweetProps } from "../components/feed/Tweet";
 import { useTheme } from "../context/useTheme";
 
-// Importamos os componentes visuais recém-criados
 import { TweetComposer } from "../components/feed/TweetComposer";
 import { FeedTabs } from "../components/feed/FeedTabs";
+import { TweetList } from "../components/feed/TweetList";
 
 interface UserData {
   username: string;
@@ -57,7 +57,6 @@ export default function Feed() {
     getTweets().then((data) => setTweets(data));
   }, []);
 
-  // Adicionámos o tipo <HTMLFormElement> para bater certo com a correção do TweetComposer
   const handlePostTweet = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -110,19 +109,10 @@ export default function Feed() {
       />
 
       {/* COMPONENTE 3: Lista de Tweets */}
-      <div>
-        {displayedTweets.length > 0 ? (
-          displayedTweets.map((tweet) => (
-            <Tweet key={tweet.id} {...tweet} />
-          ))
-        ) : (
-          <div className="text-center text-secondary py-5">
-            {activeTab === "following" 
-              ? "Ainda não segues ninguém. Descobre novos utilizadores no separador 'Todos os Tweets'!" 
-              : "Ainda não há nenhum tweet publicado. Sê o primeiro!"}
-          </div>
-        )}
-      </div>
+      <TweetList 
+        tweets={displayedTweets} 
+        activeTab={activeTab} 
+      />
 
     </div>
   ); 

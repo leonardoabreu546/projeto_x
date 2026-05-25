@@ -8,8 +8,7 @@
       "role": "admin",
       "following": [
         "Alice",
-        "111",
-        "2334"
+        "111"
       ],
       "profileColor": "bg-primary"
     },
