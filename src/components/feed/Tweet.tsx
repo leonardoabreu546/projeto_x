@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
+import { FaRetweet } from "react-icons/fa";
 
 export interface TweetProps {
   id: number;
@@ -22,12 +23,14 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
   const [hasLiked, setHasLiked] = useState(false); 
 
   const [currentFollowers, setCurrentFollowers] = useState(followers || 0);
+  
+  // <-- NOVO ESTADO: CONTROLAR SE JÁ REPUBLICOU -->
+  const [hasReposted, setHasReposted] = useState(false);
 
   const isOwnTweet = user?.username === author;
   const isFollowing = user?.following?.includes(author);
 
   const handleLike = async () => {
-    // Bloqueia o like se for o próprio autor
     if (isOwnTweet) {
       alert("Não podes dar like nas tuas próprias publicações!");
       return;
@@ -49,6 +52,41 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
     setCurrentFollowers(isFollowing ? currentFollowers - 1 : currentFollowers + 1);
   };
 
+  // <-- FUNÇÃO REPUBLICAR ATUALIZADA COM AS REGRAS -->
+  const handleRepost = async () => {
+    if (!user) return;
+
+    // Regra 1: Bloquear se o tweet for do próprio utilizador
+    if (isOwnTweet) {
+      alert("Não podes republicar as tuas próprias publicações!");
+      return;
+    }
+
+    // Regra 2: Bloquear se já tiver republicado uma vez
+    if (hasReposted) {
+      alert("Já republicaste esta publicação!");
+      return;
+    }
+
+    const novoTweet = {
+      id: Date.now().toString(),
+      author: user.username,
+      message: message,
+      image: image || "",
+      likes: 0,
+      followers: user.following?.length || 0,
+      date: new Date().toISOString()
+    };
+
+    try {
+      await axios.post('http://localhost:3000/tweets', novoTweet);
+      setHasReposted(true); // Bloqueia futuras tentativas
+      alert("Publicação republicada com sucesso! Atualiza a página para ver.");
+    } catch (error) {
+      console.error("Erro ao republicar:", error);
+    }
+  };
+
   return (
     <div className="card mb-3 border rounded-4 shadow-none bg-body">
       <div className="card-body">
@@ -61,7 +99,6 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
             >
               {author.charAt(0).toUpperCase()}
             </div>
-            {/* Adicionado text-start aqui também para garantir o alinhamento do nome */}
             <div className="d-flex flex-column lh-1 text-start">
               <span className={`fw-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{author}</span>
               <small className="text-secondary mt-1">@{author.toLowerCase()}</small>
@@ -78,7 +115,6 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
           )}
         </div>
 
-        {/* <-- ALTERADO: Adicionado 'text-start' para alinhar o texto do tweet à esquerda --> */}
         <p className={`card-text fs-5 mt-3 mb-3 text-start ${theme === 'dark' ? 'text-white' : 'text-black'}`} style={{ whiteSpace: "pre-wrap" }}>
           {message}
         </p>
@@ -109,6 +145,19 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
             <span className="d-flex align-items-center gap-1" title="Seguidores do autor">
               <span className="fs-6">👥</span> {currentFollowers}
             </span>
+
+            {/* BOTÃO DE REPUBLICAR ATUALIZADO */}
+            {!isOwnTweet && (
+              <button 
+                className={`btn btn-sm bg-transparent border-0 p-0 d-flex align-items-center gap-1 ${hasReposted ? "text-muted" : "text-success"}`}
+                onClick={handleRepost}
+                disabled={hasReposted}
+                title={hasReposted ? "Já republicado" : "Republicar"}
+              >
+                <FaRetweet className="fs-5" />
+              </button>
+            )}
+
           </div>
 
           <small>

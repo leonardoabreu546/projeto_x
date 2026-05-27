@@ -2,15 +2,14 @@
   "users": [
     {
       "id": "me4llzoKQQ4",
-      "username": "accd",
+      "username": "233",
       "email": "233@email.com",
       "password": "232",
       "role": "admin",
       "following": [
-        "Alice",
         "111"
       ],
-      "profileColor": "bg-warning"
+      "profileColor": "bg-primary"
     },
     {
       "username": "2334",
@@ -74,17 +73,27 @@
       "author": "2334",
       "message": "wdecew",
       "image": "",
-      "likes": 1,
+      "likes": 2,
       "followers": 0,
       "date": "2026-05-23T22:32:17.523Z"
     },
     {
-      "id": "HwZ8-rJWM3U",
+      "id": "ZfwodCmVh0g",
       "author": "233",
       "message": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
       "image": "",
       "likes": 0,
-      "date": "2026-05-24T12:54:20.034Z"
+      "followers": 1,
+      "date": "2026-05-27T20:59:17.528Z"
+    },
+    {
+      "id": "FObGo38Mhf4",
+      "author": "233",
+      "message": "wdecew",
+      "image": "",
+      "likes": 0,
+      "followers": 1,
+      "date": "2026-05-27T21:02:10.489Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
