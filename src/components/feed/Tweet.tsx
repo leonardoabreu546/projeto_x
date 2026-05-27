@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState} from "react";
 import axios from "axios";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
@@ -18,14 +18,24 @@ export interface TweetProps {
 function Tweet({ id, author, message, image, followers, date, likes }: TweetProps) {
   const { user, toggleFollow } = useAuth();
   const { theme } = useTheme();
-  
-  const [currentLikes, setCurrentLikes] = useState(likes || 0);
-  const [hasLiked, setHasLiked] = useState(false); 
 
+  // Chaves únicas para guardar no LocalStorage (Ex: liked_Leonardo_123)
+  const likeStorageKey = user ? `liked_${user.username}_${id}` : null;
+  const repostStorageKey = user ? `reposted_${user.username}_${id}` : null;
+
+  const [currentLikes, setCurrentLikes] = useState(likes || 0);
   const [currentFollowers, setCurrentFollowers] = useState(followers || 0);
-  
-  // <-- NOVO ESTADO: CONTROLAR SE JÁ REPUBLICOU -->
-  const [hasReposted, setHasReposted] = useState(false);
+
+  // <-- CORREÇÃO: Os estados agora começam por verificar a memória do navegador -->
+  const [hasLiked, setHasLiked] = useState(() => {
+    if (!likeStorageKey) return false;
+    return localStorage.getItem(likeStorageKey) === "true";
+  });
+
+  const [hasReposted, setHasReposted] = useState(() => {
+    if (!repostStorageKey) return false;
+    return localStorage.getItem(repostStorageKey) === "true";
+  });
 
   const isOwnTweet = user?.username === author;
   const isFollowing = user?.following?.includes(author);
@@ -37,11 +47,21 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
     }
 
     const newLikesCount = hasLiked ? currentLikes - 1 : currentLikes + 1;
+    const newHasLiked = !hasLiked;
 
     try {
       await axios.patch(`http://localhost:3000/tweets/${id}`, { likes: newLikesCount });
       setCurrentLikes(newLikesCount);
-      setHasLiked(!hasLiked);
+      setHasLiked(newHasLiked);
+
+      // <-- CORREÇÃO: Guarda ou apaga a ação na memória do navegador -->
+      if (likeStorageKey) {
+        if (newHasLiked) {
+          localStorage.setItem(likeStorageKey, "true");
+        } else {
+          localStorage.removeItem(likeStorageKey);
+        }
+      }
     } catch (error) {
       console.error("Erro ao atualizar o like:", error);
     }
@@ -52,17 +72,14 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
     setCurrentFollowers(isFollowing ? currentFollowers - 1 : currentFollowers + 1);
   };
 
-  // <-- FUNÇÃO REPUBLICAR ATUALIZADA COM AS REGRAS -->
   const handleRepost = async () => {
     if (!user) return;
 
-    // Regra 1: Bloquear se o tweet for do próprio utilizador
     if (isOwnTweet) {
       alert("Não podes republicar as tuas próprias publicações!");
       return;
     }
 
-    // Regra 2: Bloquear se já tiver republicado uma vez
     if (hasReposted) {
       alert("Já republicaste esta publicação!");
       return;
@@ -80,7 +97,13 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
 
     try {
       await axios.post('http://localhost:3000/tweets', novoTweet);
-      setHasReposted(true); // Bloqueia futuras tentativas
+      setHasReposted(true);
+      
+      // <-- CORREÇÃO: Memoriza que este utilizador já republicou este tweet -->
+      if (repostStorageKey) {
+        localStorage.setItem(repostStorageKey, "true");
+      }
+      
       alert("Publicação republicada com sucesso! Atualiza a página para ver.");
     } catch (error) {
       console.error("Erro ao republicar:", error);
@@ -146,7 +169,6 @@ function Tweet({ id, author, message, image, followers, date, likes }: TweetProp
               <span className="fs-6">👥</span> {currentFollowers}
             </span>
 
-            {/* BOTÃO DE REPUBLICAR ATUALIZADO */}
             {!isOwnTweet && (
               <button 
                 className={`btn btn-sm bg-transparent border-0 p-0 d-flex align-items-center gap-1 ${hasReposted ? "text-muted" : "text-success"}`}
