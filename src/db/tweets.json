@@ -9,7 +9,7 @@
       "following": [
         "111"
       ],
-      "profileColor": "bg-primary"
+      "profileColor": "bg-warning"
     },
     {
       "username": "2334",
@@ -29,6 +29,16 @@
       "role": "user",
       "following": [],
       "id": "FgDrqaleCVA"
+    },
+    {
+      "username": "8888",
+      "email": "8888@email.com",
+      "password": "888",
+      "role": "user",
+      "following": [
+        "233"
+      ],
+      "id": "t8zXUy86n_8"
     }
   ],
   "tweets": [
@@ -91,9 +101,18 @@
       "author": "233",
       "message": "wdecew",
       "image": "",
-      "likes": 0,
+      "likes": 1,
       "followers": 1,
       "date": "2026-05-27T21:02:10.489Z"
+    },
+    {
+      "id": "qe0XnjBu-jU",
+      "author": "8888",
+      "message": "wdecew",
+      "image": "",
+      "likes": 1,
+      "followers": 0,
+      "date": "2026-05-28T09:41:57.162Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
